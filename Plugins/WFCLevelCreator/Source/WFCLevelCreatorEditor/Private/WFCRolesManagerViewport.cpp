@@ -34,11 +34,16 @@ void SWFCRolesManagerViewport::Construct(const FArguments& InArgs)
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 
 	PreviewScene->SetFloorVisibility(false);
-	
+
+	/*生成网格actor*/
 	WFCGridManager = CastChecked<AWFCGridManager>(PreviewScene->GetWorld()->SpawnActor(WFCRolesManagerAsset->WFCGridManagerClass));
 	WFCRolesManagerAsset->WFCGridManagerRef = WFCGridManager;
-	
-	EditorViewportClient->MoveViewportCamera(FVector(-3000, 0, 2000), FRotator(-35.f, 0.f, 0.f));
+	WFCGridManager->UpdateGridSetting(WFCRolesManagerAsset);
+	float Offsetx = WFCRolesManagerAsset->Num_X * WFCRolesManagerAsset->GridSize * -0.7f;
+	float Offsety = WFCRolesManagerAsset->Num_Y * WFCRolesManagerAsset->GridSize * 0.5;
+	float Offsetz = WFCRolesManagerAsset->Num_Y * WFCRolesManagerAsset->GridSize * 1.2f  + 200.f;
+
+	EditorViewportClient->MoveViewportCamera(FVector(Offsetx, Offsety, Offsetz), FRotator(-35.f, 0.f, 0.f));
 	
 }
 

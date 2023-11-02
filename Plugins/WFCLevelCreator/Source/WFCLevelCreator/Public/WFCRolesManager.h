@@ -66,5 +66,18 @@ public:
 	
 	TObjectPtr<AWFCGridManager> WFCGridManagerRef = nullptr;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	int32 Num_X = 3;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	int32 Num_Y = 3;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	float GridSize = 100.f;
+	
+public:
+	void InitThumbnails();
+	FSlateBrush* GetBrushByIndex(int32 index);
+	TArray<UTexture2D*> Thumbnails;
+	TArray<FSlateBrush> Brushes;
 };

@@ -23,6 +23,7 @@ protected:
 	void OnUnHovered();
 	void OnPressed();
 	void OnNewBrushSelect();
+
 private:
 	TSharedPtr<class SButton> Button;
 	TSharedPtr<class SBorder> Border;
@@ -62,6 +63,9 @@ private:
 	/* Tab spawners */
 	TSharedRef<SDockTab> SpawnTab_Viewport(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnTab_Properties(const FSpawnTabArgs& Args);
+	TSharedRef<SVerticalBox> FillInputItemsView();
+	
+	void InitThumbnails();
 	
 	void BindCommands();
 	void ExtendToolbar();

@@ -22,7 +22,7 @@ void SMyTileItem::Construct(const FArguments& InArgs)
 	WFCAsset = InArgs._WFCAsset.Get();
 	InputTileIndex = InArgs._InputTileIndex.Get();
 
-	FSlateBrush* Brush;// = WFCAsset->GetBrushByIndex(InputTileIndex);
+	FSlateBrush* Brush = WFCAsset->GetBrushByIndex(InputTileIndex);
 	ChildSlot
 	[
 		SAssignNew(Button, SButton)
@@ -40,35 +40,19 @@ void SMyTileItem::Construct(const FArguments& InArgs)
 
 void SMyTileItem::OnHovered()
 {
-	Button->SetColorAndOpacity(FLinearColor(0.2, 0.2, 1, 1));
+
 }
 
 void SMyTileItem::OnUnHovered()
 {
-	if (!IsSelected)
-	{
-		Button->SetColorAndOpacity(FLinearColor::White);
-	}
-	else
-	{
-		Button->SetColorAndOpacity(FLinearColor::Green);
-	}
+	Button->SetColorAndOpacity(FLinearColor::White);
 }
 
 void SMyTileItem::OnPressed()
 {
-	Button->SetColorAndOpacity(FLinearColor::Green);
-
-	// if (WFCAsset->GetInputTileIndexSelected() != InputTileIndex)
-	// {
-	// 	WFCAsset->InputileIndexSelectedChange(InputTileIndex);
-	// 	if (WFCAsset->LastSelected)
-	// 	{
-	// 		WFCAsset->LastSelected->OnNewBrushSelect();
-	// 	}
-	// 	WFCAsset->LastSelected = this;
-	// }
 	IsSelected = true;
+	Button->SetColorAndOpacity(FLinearColor::Red);
+
 }
 
 void SMyTileItem::OnNewBrushSelect()
@@ -218,7 +202,8 @@ TSharedRef<SDockTab> FWFCRolesManagerToolkit::SpawnTab_Properties(const FSpawnTa
 {
 	check(Args.GetTabId() == PropertiesTabId);
 	InputVbx = SNew(SVerticalBox);
-	
+	FillInputItemsView();
+
 	DetailsViewTab =  SNew(SDockTab)
 		.Label(LOCTEXT("WFCRolesManagerEditorProperties_TabTitle", "Details"))
 		[
@@ -235,6 +220,64 @@ TSharedRef<SDockTab> FWFCRolesManagerToolkit::SpawnTab_Properties(const FSpawnTa
 	return DetailsViewTab.ToSharedRef();
 }
 
+void FWFCRolesManagerToolkit::InitThumbnails()
+{
+	WfcRolesManagerAssetRef->InitThumbnails();
+	FillInputItemsView();
+}
+
+TSharedRef<SVerticalBox> FWFCRolesManagerToolkit::FillInputItemsView()
+{
+	InputVbx->ClearChildren();
+	
+	InputVbx->AddSlot()
+		.AutoHeight()
+		.HAlign(HAlign_Left)
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Relod WFC Items!"))
+			.OnPressed(this, &FWFCRolesManagerToolkit::InitThumbnails)
+		];
+	if (WfcRolesManagerAssetRef)
+	{
+		if(WfcRolesManagerAssetRef->Thumbnails.Num() > 0)
+		{
+			int32 RowEach = 5;
+			int32 Rows = (WfcRolesManagerAssetRef->WFCItemClasses.Num() - 1) / RowEach;
+
+			for (int32 r=0; r<=Rows; r++)
+			{
+				TSharedPtr<SHorizontalBox> TmpHbx = SNew(SHorizontalBox);
+
+				for (int32 c = 0; c < RowEach && r * RowEach + c < WfcRolesManagerAssetRef->WFCItemClasses.Num(); c++)
+				{
+					int32 TileIndex =  r * RowEach + c;
+					TmpHbx->AddSlot()
+						.AutoWidth()
+						.VAlign(VAlign_Center)
+						[
+							SNew(SBorder)
+							.VAlign(VAlign_Fill)
+							.HAlign(HAlign_Fill)
+							.Padding(0)
+							[
+								SNew(SMyTileItem)
+								.WFCAsset(WfcRolesManagerAssetRef)
+								.InputTileIndex(TileIndex)
+							]
+						];
+				}
+				InputVbx->AddSlot()
+					.AutoHeight()
+					.HAlign(HAlign_Left)
+					[
+						TmpHbx.ToSharedRef()
+					];
+			}
+		}
+	}
+	return InputVbx.ToSharedRef();
+}
 void FWFCRolesManagerToolkit::BindCommands()
 {
 	const FWFCRolesManagerEditorCommands& Commands = FWFCRolesManagerEditorCommands::Get();

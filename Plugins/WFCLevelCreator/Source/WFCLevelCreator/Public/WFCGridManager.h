@@ -11,18 +11,22 @@ class UWFCTemplate;
 class FAdvancedPreviewScene;
 class UWFCRolesManagerAsset;
 class UWFCGridSettings;
+class AWFCGridItemBase;
 
 UCLASS()
 class WFCLEVELCREATOR_API AWFCGridItemBase : public AActor
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid Item")
-	int32 GridIndex = 0;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "WFC Grid Item")
+	FIntVector GridXY;
 	
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
 	void OnHonvered(bool IsHovered);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
+	void OnDragged(bool IsHovered);
 };
 
 UCLASS()
@@ -42,9 +46,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	UFUNCTION(BlueprintImplementableEvent, CallInEditor, Category = "WFC Grid")
+	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
 	void ResetGrid();
-	
+	void UpdateGridSetting(UWFCRolesManagerAsset* RolesManager);
 	void SetGridItemsHidenInEditor(bool IsHid);
 	
 public:
@@ -56,5 +60,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	float GridSize = 100.f;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	TMap<FIntVector, AWFCGridItemBase*> GridItemsSave;
 };

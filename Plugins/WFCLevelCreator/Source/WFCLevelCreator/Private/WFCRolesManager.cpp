@@ -20,6 +20,43 @@ UWFCRolesManagerAsset::UWFCRolesManagerAsset()
 void UWFCRolesManagerAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if(PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UWFCRolesManagerAsset, Num_X) ||
+	PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UWFCRolesManagerAsset, Num_Y) ||
+	PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UWFCRolesManagerAsset, GridSize))
+	{
+		if(WFCGridManagerRef)
+		{
+			WFCGridManagerRef->UpdateGridSetting(this);
+		}
+	}
+}
+
+void UWFCRolesManagerAsset::InitThumbnails()
+{
+	Thumbnails.Empty();
+	Brushes.Empty();
+	int32 ImageRes = 64;
+
+	for (auto itemClass : WFCItemClasses)
+	{
+		UTexture2D* ImageTmp = UTexture2D::CreateTransient(ImageRes, ImageRes);
+		ULevelCreatorLibrary::GetObjThumbnail(ImageRes*4, itemClass->ClassGeneratedBy, ImageTmp);
+		Thumbnails.Add(ImageTmp);
+
+		FSlateBrush TempBrushOutput;
+		TempBrushOutput.SetResourceObject(ImageTmp);
+		TempBrushOutput.ImageSize = FVector2D(ImageRes, ImageRes);
+		Brushes.Add(TempBrushOutput);
+	}
+}
+
+FSlateBrush* UWFCRolesManagerAsset::GetBrushByIndex(int32 index)
+{
+	if(Brushes.IsValidIndex(index))
+	{
+		return &Brushes[index];
+	}
+	return nullptr;
 }
 
 

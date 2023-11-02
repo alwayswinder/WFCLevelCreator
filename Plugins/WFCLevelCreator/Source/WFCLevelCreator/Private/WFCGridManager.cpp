@@ -24,9 +24,23 @@ void AWFCGridManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AWFCGridManager::UpdateGridSetting(UWFCRolesManagerAsset* RolesManager)
+{
+	if(RolesManager)
+	{
+		Num_X = RolesManager->Num_X;
+		Num_Y = RolesManager->Num_Y;
+		GridSize = RolesManager->GridSize;
+		ResetGrid();
+	}
+}
+
 void AWFCGridManager::SetGridItemsHidenInEditor(bool IsHid)
 {
-	
+	for (auto GridItem : GridItemsSave)
+	{
+		GridItem.Value->SetIsTemporarilyHiddenInEditor(IsHid);
+	}
 }
 
 
