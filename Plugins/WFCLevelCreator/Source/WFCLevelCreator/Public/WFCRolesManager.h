@@ -80,4 +80,5 @@ public:
 	FSlateBrush* GetBrushByIndex(int32 index);
 	TArray<UTexture2D*> Thumbnails;
 	TArray<FSlateBrush> Brushes;
+	int32 SelectedClassIndex = 0;
 };

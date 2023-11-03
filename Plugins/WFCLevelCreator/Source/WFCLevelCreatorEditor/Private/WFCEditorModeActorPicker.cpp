@@ -57,6 +57,7 @@ bool FWFCEdModeActorPicker::MouseLeave(FEditorViewportClient* ViewportClient, FV
 
 bool FWFCEdModeActorPicker::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Mouse Move!"));
 	//if (ViewportClient == GCurrentLevelEditingViewportClient)
 	if (ViewportClient)
 	{
@@ -128,8 +129,8 @@ bool FWFCEdModeActorPicker::InputKey(FEditorViewportClient* ViewportClient, FVie
 				}
 				if(IsActorValid(Actor))
 				{
-					OnActorSelected.ExecuteIfBound(Actor);
-					//RequestDeletion();
+					//OnActorSelected.ExecuteIfBound(Actor);
+					OnActorHovered.ExecuteIfBound(Actor);
 				}
 			}
 			return true;

@@ -20,14 +20,13 @@ const FName FWFCRolesManagerToolkit::PropertiesTabId(TEXT("WFCRolesManagerEditor
 void SMyTileItem::Construct(const FArguments& InArgs)
 {
 	WFCAsset = InArgs._WFCAsset.Get();
+	Toolkit = InArgs._Toolkit.Get();
 	InputTileIndex = InArgs._InputTileIndex.Get();
 
 	FSlateBrush* Brush = WFCAsset->GetBrushByIndex(InputTileIndex);
 	ChildSlot
 	[
 		SAssignNew(Button, SButton)
-		.OnHovered(this, &SMyTileItem::OnHovered)
-		.OnUnhovered(this, &SMyTileItem::OnUnHovered)
 		.OnPressed(this, &SMyTileItem::OnPressed)
 		.ContentPadding(0)
 		.Content()
@@ -38,27 +37,22 @@ void SMyTileItem::Construct(const FArguments& InArgs)
 	];
 }
 
-void SMyTileItem::OnHovered()
-{
-
-}
-
-void SMyTileItem::OnUnHovered()
-{
-	Button->SetColorAndOpacity(FLinearColor::White);
-}
-
 void SMyTileItem::OnPressed()
 {
-	IsSelected = true;
-	Button->SetColorAndOpacity(FLinearColor::Red);
-
+	WFCAsset->SelectedClassIndex = InputTileIndex;
+	Toolkit->UpdateTilesSelectState();
 }
 
-void SMyTileItem::OnNewBrushSelect()
+void SMyTileItem::CheckSelected()
 {
-	Button->SetColorAndOpacity(FLinearColor::White);
-	IsSelected = false;
+	if(InputTileIndex == WFCAsset->SelectedClassIndex)
+	{
+		Button->SetBorderBackgroundColor(FLinearColor::Green);
+	}
+	else
+	{
+		Button->SetBorderBackgroundColor(FLinearColor::White);
+	}
 }
 
 void FWFCRolesManagerToolkit::InitWFCRolesManagerEditor(const EToolkitMode::Type Mode,
@@ -244,7 +238,9 @@ TSharedRef<SVerticalBox> FWFCRolesManagerToolkit::FillInputItemsView()
 		{
 			int32 RowEach = 5;
 			int32 Rows = (WfcRolesManagerAssetRef->WFCItemClasses.Num() - 1) / RowEach;
-
+			
+			TileItems.Empty();
+			
 			for (int32 r=0; r<=Rows; r++)
 			{
 				TSharedPtr<SHorizontalBox> TmpHbx = SNew(SHorizontalBox);
@@ -252,6 +248,8 @@ TSharedRef<SVerticalBox> FWFCRolesManagerToolkit::FillInputItemsView()
 				for (int32 c = 0; c < RowEach && r * RowEach + c < WfcRolesManagerAssetRef->WFCItemClasses.Num(); c++)
 				{
 					int32 TileIndex =  r * RowEach + c;
+					TSharedPtr<SMyTileItem> TmpTileItem;
+					
 					TmpHbx->AddSlot()
 						.AutoWidth()
 						.VAlign(VAlign_Center)
@@ -261,11 +259,13 @@ TSharedRef<SVerticalBox> FWFCRolesManagerToolkit::FillInputItemsView()
 							.HAlign(HAlign_Fill)
 							.Padding(0)
 							[
-								SNew(SMyTileItem)
+								SAssignNew(TmpTileItem, SMyTileItem)
 								.WFCAsset(WfcRolesManagerAssetRef)
+								.Toolkit(this)
 								.InputTileIndex(TileIndex)
 							]
 						];
+					TileItems.Add(TmpTileItem);
 				}
 				InputVbx->AddSlot()
 					.AutoHeight()
@@ -314,6 +314,14 @@ void FWFCRolesManagerToolkit::FillToolbar(FToolBarBuilder& ToolbarBuilder,
 		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowGrid);
 	}
 	ToolbarBuilder.EndSection();
+}
+
+void FWFCRolesManagerToolkit::UpdateTilesSelectState()
+{
+	for (auto TileItem : TileItems)
+	{
+		TileItem->CheckSelected();
+	}
 }
 
 void FWFCRolesManagerToolkit::ToggleTest()

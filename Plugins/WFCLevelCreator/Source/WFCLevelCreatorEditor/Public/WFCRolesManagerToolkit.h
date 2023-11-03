@@ -6,6 +6,7 @@
 #include "WFCRolesManager.h"
 
 class FEditorViewportTabContent;
+class FWFCRolesManagerToolkit;
 /**
  * 
  */
@@ -14,22 +15,23 @@ class SMyTileItem : public SCompoundWidget
 public:
 	SLATE_BEGIN_ARGS(SMyTileItem) {}
 	SLATE_ATTRIBUTE(UWFCRolesManagerAsset*, WFCAsset)
+	SLATE_ATTRIBUTE(FWFCRolesManagerToolkit*, Toolkit)
 	SLATE_ATTRIBUTE(int32, InputTileIndex)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
 protected:
-	void OnHovered();
-	void OnUnHovered();
 	void OnPressed();
-	void OnNewBrushSelect();
-
+	
+public:
+	void CheckSelected();
 private:
 	TSharedPtr<class SButton> Button;
-	TSharedPtr<class SBorder> Border;
 	UWFCRolesManagerAsset* WFCAsset;
+	FWFCRolesManagerToolkit* Toolkit;
 	int32 InputTileIndex;
 	bool IsSelected;
+	
 };
 class FWFCRolesManagerToolkit : public FAssetEditorToolkit, public FNotifyHook, public FGCObject
 {
@@ -70,7 +72,8 @@ private:
 	void BindCommands();
 	void ExtendToolbar();
 	void FillToolbar(FToolBarBuilder& ToolbarBuilder, const TSharedRef<FUICommandList> InToolkitCommands);
-
+	
+	
 	void ToggleTest();
 	bool IsPressed() const;
 	
@@ -81,8 +84,11 @@ private:
 	TSharedPtr<IDetailsView> WFCRolesManagerDetailsView;
 	TSharedPtr<SDockTab> DetailsViewTab;
 	TSharedPtr<SVerticalBox> InputVbx;
+	TArray<TSharedPtr<SMyTileItem>> TileItems;
 	
 	UWFCRolesManagerAsset* WfcRolesManagerAssetRef = nullptr;
 
 	FTimerHandle InitThumTimer;
+public:
+	void UpdateTilesSelectState();
 };
