@@ -50,6 +50,8 @@ bool FWFCEdModeActorPicker::MouseEnter(FEditorViewportClient* ViewportClient, FV
 
 bool FWFCEdModeActorPicker::MouseLeave(FEditorViewportClient* ViewportClient, FViewport* Viewport)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Mouse Leave!"));
+
 	PickState = EPickState::NotOverViewport;
 	HoveredActor.Reset();
 	return FEdMode::MouseLeave(ViewportClient, Viewport);
@@ -57,7 +59,7 @@ bool FWFCEdModeActorPicker::MouseLeave(FEditorViewportClient* ViewportClient, FV
 
 bool FWFCEdModeActorPicker::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Mouse Move!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Mouse Move!"));
 	//if (ViewportClient == GCurrentLevelEditingViewportClient)
 	if (ViewportClient)
 	{
@@ -79,7 +81,7 @@ bool FWFCEdModeActorPicker::MouseMove(FEditorViewportClient* ViewportClient, FVi
 				}
 				if(IsActorValid(Actor))
 				{
-					OnActorHovered.ExecuteIfBound(Actor);
+					//OnActorHovered.ExecuteIfBound(Actor);
 				}
 				HoveredActor = Actor;
 				PickState =  IsActorValid(Actor) ? EPickState::OverActor : EPickState::OverIncompatibleActor;
@@ -95,8 +97,36 @@ bool FWFCEdModeActorPicker::MouseMove(FEditorViewportClient* ViewportClient, FVi
 	return true;
 }
 
+bool FWFCEdModeActorPicker::CapturedMouseMove(FEditorViewportClient* InViewportClient, FViewport* InViewport,
+	int32 InMouseX, int32 InMouseY)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Captured Mouse Move!"));
+	int32 HitX = InViewport->GetMouseX();
+	int32 HitY = InViewport->GetMouseY();
+	HHitProxy* HitProxy = InViewport->GetHitProxy(HitX, HitY);
+	if (HitProxy != NULL && HitProxy->IsA(HActor::StaticGetType()))
+	{
+		HActor* ActorHit = static_cast<HActor*>(HitProxy);
+		if(ActorHit->Actor != NULL)
+		{
+			AActor* Actor = ActorHit->Actor;
+			while (Actor->IsChildActor())
+			{
+				Actor = Actor->GetParentActor();
+			}
+			if(IsActorValid(Actor))
+			{
+				OnActorHovered.ExecuteIfBound(Actor);
+			}
+		}
+	}
+	return FEdMode::CapturedMouseMove(InViewportClient, InViewport, InMouseX, InMouseY);
+}
+
 bool FWFCEdModeActorPicker::LostFocus(FEditorViewportClient* ViewportClient, FViewport* Viewport)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Lost Focus!"));
+
 	//if (ViewportClient == GCurrentLevelEditingViewportClient)
 	if (ViewportClient)
 	{
@@ -110,6 +140,8 @@ bool FWFCEdModeActorPicker::LostFocus(FEditorViewportClient* ViewportClient, FVi
 
 bool FWFCEdModeActorPicker::InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Input Key!"));
+
 	//if (ViewportClient == GCurrentLevelEditingViewportClient)
 	if (ViewportClient)
 	{
@@ -129,8 +161,8 @@ bool FWFCEdModeActorPicker::InputKey(FEditorViewportClient* ViewportClient, FVie
 				}
 				if(IsActorValid(Actor))
 				{
-					//OnActorSelected.ExecuteIfBound(Actor);
-					OnActorHovered.ExecuteIfBound(Actor);
+					OnActorSelected.ExecuteIfBound(Actor);
+					//OnActorHovered.ExecuteIfBound(Actor);
 				}
 			}
 			return true;

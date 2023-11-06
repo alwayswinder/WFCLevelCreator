@@ -117,26 +117,30 @@ FWFCRolesManagerEditorViewportClient::FWFCRolesManagerEditorViewportClient(
 
 void FWFCRolesManagerEditorViewportClient::OnActorSelected(AActor* ActorSelected)
 {
-	ModeTools->GetSelectedObjects()->Select(ActorSelected);
-	AWFCItemBase* SelectItem = Cast<AWFCItemBase>(ActorSelected);
-	if(SelectItem)
-	{
-		//WFCRolesManagerAsset->MakesureNext(SelectItem->GridIndex, SelectItem->NextIndex);
-	}
+	// ModeTools->GetSelectedObjects()->Select(ActorSelected);
+	// AWFCGridItemBase* SelectActor = Cast<AWFCGridItemBase>(ActorSelected);
+	// if(SelectActor)
+	// {
+	// 	SelectActor->OnHonvered(true);
+	// }
 }
 
 void FWFCRolesManagerEditorViewportClient::OnActorHovered(AActor* ActorSelected)
 {
 	AWFCGridItemBase* HoveredActor = Cast<AWFCGridItemBase>(ActorSelected);
-	if(HoveredActor != nullptr && HoveredActor != LastHoveredActor)
+	if(HoveredActor)
 	{
 		HoveredActor->OnHonvered(true);
-		if(LastHoveredActor != nullptr)
-		{
-			LastHoveredActor->OnHonvered(false);
-		}
-		LastHoveredActor = HoveredActor;
 	}
+	// if(HoveredActor != nullptr && HoveredActor != LastHoveredActor)
+	// {
+	// 	HoveredActor->OnHonvered(true);
+	// 	if(LastHoveredActor != nullptr)
+	// 	{
+	// 		LastHoveredActor->OnHonvered(false);
+	// 	}
+	// 	LastHoveredActor = HoveredActor;
+	// }
 }
 
 void FWFCRolesManagerEditorViewportClient::Tick(float DeltaSeconds)

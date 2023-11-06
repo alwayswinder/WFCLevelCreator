@@ -114,8 +114,9 @@ void FWFCRolesManagerToolkit::InitWFCRolesManagerEditor(const EToolkitMode::Type
 	FAssetEditorToolkit::InitAssetEditor(Mode, InitToolkitHost, FName(TEXT("WFCRolesManagerEditorApp")), StandaloneDefaultLayout, bCreateDefaultToolbar, bCreateDefaultStandaloneMenu, ObjectToEdit);
 	ExtendToolbar();
 	RegenerateMenusAndToolbars();
-	
-	//WfcRolesManagerAssetRef->WFCGridManagerRef->GetWorld()->GetTimerManager().SetTimer(InitThumTimer, WfcRolesManagerAssetRef->WFCGridManagerRef.Get(),  &FWFCRolesManagerToolkit::InitThumbnails, 0.5f, false, 0.5f);
+
+	//
+	WfcRolesManagerAssetRef->OnInitThumbnailsDelegate.BindRaw(this, &FWFCRolesManagerToolkit::InitThumbnails);
 }
 
 FName FWFCRolesManagerToolkit::GetToolkitFName() const

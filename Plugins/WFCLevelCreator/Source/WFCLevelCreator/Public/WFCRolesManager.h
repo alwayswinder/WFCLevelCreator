@@ -9,6 +9,7 @@
 #include "Engine/DataAsset.h"
 #include "WFCRolesManager.generated.h"
 
+DECLARE_DELEGATE( FOnInitThumbnailsDelegate);
 
 UCLASS(BlueprintType)
 class UWFCTemplate : public UDataAsset
@@ -58,6 +59,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Template")
 	TObjectPtr<UWFCTemplate> WFCTemplates;
 	
+	void InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC itme")
 	TArray<TSubclassOf<AWFCItemBase>> WFCItemClasses;
 public:
@@ -76,6 +79,7 @@ public:
 	float GridSize = 100.f;
 	
 public:
+	FOnInitThumbnailsDelegate OnInitThumbnailsDelegate;
 	void InitThumbnails();
 	FSlateBrush* GetBrushByIndex(int32 index);
 	TArray<UTexture2D*> Thumbnails;

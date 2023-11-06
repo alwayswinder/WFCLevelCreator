@@ -347,7 +347,7 @@ UWFCRolesManagerAssetFactory::UWFCRolesManagerAssetFactory()
 UObject* UWFCRolesManagerAssetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
 	UWFCRolesManagerAsset* NewAsset = NewObject<UWFCRolesManagerAsset>(InParent, Class, Name, Flags | RF_Transactional);
-	NewAsset->WFCItemClasses = WFCItemsClasses;
+	NewAsset->InitItemClasses(WFCItemsClasses);
 	return NewAsset;
 }
 

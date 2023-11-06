@@ -31,6 +31,12 @@ void UWFCRolesManagerAsset::PostEditChangeProperty(FPropertyChangedEvent& Proper
 	}
 }
 
+void UWFCRolesManagerAsset::InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes)
+{
+	WFCItemClasses = classes;
+	OnInitThumbnailsDelegate.ExecuteIfBound();
+}
+
 void UWFCRolesManagerAsset::InitThumbnails()
 {
 	Thumbnails.Empty();
