@@ -74,10 +74,13 @@ private:
 	void FillToolbar(FToolBarBuilder& ToolbarBuilder, const TSharedRef<FUICommandList> InToolkitCommands);
 	
 	
-	void ToggleTest();
-	bool IsPressed() const;
-	
-	bool bPressed = true;
+	void ShowGrid();
+	void FillGrid();
+	bool IsPressedShowGrid() const;
+	bool IsPressedFillGrid() const;
+
+	bool bShowGrid = true;
+	bool bFillGrid= false;
 	
 	TSharedPtr<FEditorViewportTabContent> ViewportTabContent;
 	

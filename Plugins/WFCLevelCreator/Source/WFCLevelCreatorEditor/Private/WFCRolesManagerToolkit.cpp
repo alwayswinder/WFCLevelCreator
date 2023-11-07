@@ -286,9 +286,14 @@ void FWFCRolesManagerToolkit::BindCommands()
 	const TSharedRef<FUICommandList>& UICommandList = GetToolkitCommands();
 
 	UICommandList->MapAction(Commands.ShowGrid,
-		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::ToggleTest),
+		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::ShowGrid),
 		FCanExecuteAction(),
-		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressed));
+		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedShowGrid));
+	
+	UICommandList->MapAction(Commands.FillGrid,
+		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::FillGrid),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedFillGrid));
 }
 
 void FWFCRolesManagerToolkit::ExtendToolbar()
@@ -313,6 +318,9 @@ void FWFCRolesManagerToolkit::FillToolbar(FToolBarBuilder& ToolbarBuilder,
 	ToolbarBuilder.BeginSection("WFC");
 	{
 		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowGrid);
+
+		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().FillGrid);
+
 	}
 	ToolbarBuilder.EndSection();
 }
@@ -325,24 +333,43 @@ void FWFCRolesManagerToolkit::UpdateTilesSelectState()
 	}
 }
 
-void FWFCRolesManagerToolkit::ToggleTest()
+void FWFCRolesManagerToolkit::ShowGrid()
 {
-	if(bPressed)
+	if(bShowGrid)
 	{
-		bPressed = false;
+		bShowGrid = false;
 		WfcRolesManagerAssetRef->WFCGridManagerRef->SetGridItemsHidenInEditor(true);
 		GEditor->RedrawAllViewports();
 	}
 	else
 	{
-		bPressed = true;
+		bShowGrid = true;
 		WfcRolesManagerAssetRef->WFCGridManagerRef->SetGridItemsHidenInEditor(false);
 		GEditor->RedrawAllViewports();
 	}
 }
 
-bool FWFCRolesManagerToolkit::IsPressed() const
+void FWFCRolesManagerToolkit::FillGrid()
 {
-	return bPressed;
+	if(bFillGrid)
+	{
+		bFillGrid = false;
+		WfcRolesManagerAssetRef->bFillMode = false;
+	}
+	else
+	{
+		bFillGrid = true;
+		WfcRolesManagerAssetRef->bFillMode = true;
+	}
+}
+
+bool FWFCRolesManagerToolkit::IsPressedShowGrid() const
+{
+	return bShowGrid;
+}
+
+bool FWFCRolesManagerToolkit::IsPressedFillGrid() const
+{
+	return bFillGrid;
 }
 #undef LOCTEXT_NAMESPACE

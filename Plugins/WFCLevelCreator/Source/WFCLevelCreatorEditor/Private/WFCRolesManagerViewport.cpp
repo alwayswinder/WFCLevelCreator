@@ -38,7 +38,8 @@ void SWFCRolesManagerViewport::Construct(const FArguments& InArgs)
 	/*生成网格actor*/
 	WFCGridManager = CastChecked<AWFCGridManager>(PreviewScene->GetWorld()->SpawnActor(WFCRolesManagerAsset->WFCGridManagerClass));
 	WFCRolesManagerAsset->WFCGridManagerRef = WFCGridManager;
-	WFCGridManager->UpdateGridSetting(WFCRolesManagerAsset);
+	WFCGridManager->RolesManager = WFCRolesManagerAsset;
+	WFCGridManager->UpdateGridSetting();
 	float Offsetx = WFCRolesManagerAsset->Num_X * WFCRolesManagerAsset->GridSize * -0.7f;
 	float Offsety = WFCRolesManagerAsset->Num_Y * WFCRolesManagerAsset->GridSize * 0.5;
 	float Offsetz = WFCRolesManagerAsset->Num_Y * WFCRolesManagerAsset->GridSize * 1.2f  + 200.f;
@@ -110,28 +111,32 @@ FWFCRolesManagerEditorViewportClient::FWFCRolesManagerEditorViewportClient(
 	 FWFCEdModeActorPicker* Mode = ModeTools->GetActiveModeTyped<FWFCEdModeActorPicker>(FWFCEdModeActorPicker::EM_WFCManager);
 	 if (ensure(Mode))
 	 {
-	 	Mode->OnActorSelected.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorSelected);
+	 	Mode->OnActorFilled.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorFilled);
 	 	Mode->OnActorHovered.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorHovered);
 	 }
 }
 
-void FWFCRolesManagerEditorViewportClient::OnActorSelected(AActor* ActorSelected)
+void FWFCRolesManagerEditorViewportClient::OnActorFilled(AActor* ActorSelected, bool IsAdd)
 {
-	// ModeTools->GetSelectedObjects()->Select(ActorSelected);
-	// AWFCGridItemBase* SelectActor = Cast<AWFCGridItemBase>(ActorSelected);
-	// if(SelectActor)
-	// {
-	// 	SelectActor->OnHonvered(true);
-	// }
+	if(!WFCRolesManagerAsset->bFillMode)
+	{
+		return;
+	}
+	ModeTools->GetSelectedObjects()->Select(ActorSelected);
+	AWFCGridItemBase* SelectActor = Cast<AWFCGridItemBase>(ActorSelected);
+	if(SelectActor)
+	{
+		SelectActor->OnFilled(IsAdd);
+	}
 }
 
 void FWFCRolesManagerEditorViewportClient::OnActorHovered(AActor* ActorSelected)
 {
-	AWFCGridItemBase* HoveredActor = Cast<AWFCGridItemBase>(ActorSelected);
-	if(HoveredActor)
-	{
-		HoveredActor->OnHonvered(true);
-	}
+	// AWFCGridItemBase* HoveredActor = Cast<AWFCGridItemBase>(ActorSelected);
+	// if(HoveredActor)
+	// {
+	// 	HoveredActor->OnHonvered(true);
+	// }
 	// if(HoveredActor != nullptr && HoveredActor != LastHoveredActor)
 	// {
 	// 	HoveredActor->OnHonvered(true);

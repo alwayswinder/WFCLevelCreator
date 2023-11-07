@@ -85,4 +85,7 @@ public:
 	TArray<UTexture2D*> Thumbnails;
 	TArray<FSlateBrush> Brushes;
 	int32 SelectedClassIndex = 0;
+	
+public:
+	bool bFillMode = false;
 };

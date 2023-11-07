@@ -66,7 +66,7 @@ public:
 		const TWeakPtr<SEditorViewport>& InEditorViewportWidget = nullptr);
 
 	//
-	void OnActorSelected(AActor* ActorSelected);
+	void OnActorFilled(AActor* ActorSelected, bool IsAdd = true);
 	void OnActorHovered(AActor* ActorSelected);
 
 	//

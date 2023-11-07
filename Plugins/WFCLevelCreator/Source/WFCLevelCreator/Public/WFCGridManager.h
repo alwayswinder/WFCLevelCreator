@@ -21,9 +21,15 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "WFC Grid Item")
 	FIntVector GridXY;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid Item")
+	TObjectPtr<UWFCRolesManagerAsset> RolesManager;
+	
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
 	void OnHonvered(bool IsHovered);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
+	void OnFilled(bool IsAdd);
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
 	void OnDragged(bool IsHovered);
@@ -48,10 +54,13 @@ public:
 public:
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
 	void ResetGrid();
-	void UpdateGridSetting(UWFCRolesManagerAsset* RolesManager);
+	void UpdateGridSetting();
 	void SetGridItemsHidenInEditor(bool IsHid);
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	TObjectPtr<UWFCRolesManagerAsset> RolesManager;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	int32 Num_X = 3;
 	

@@ -26,7 +26,7 @@ void UWFCRolesManagerAsset::PostEditChangeProperty(FPropertyChangedEvent& Proper
 	{
 		if(WFCGridManagerRef)
 		{
-			WFCGridManagerRef->UpdateGridSetting(this);
+			WFCGridManagerRef->UpdateGridSetting();
 		}
 	}
 }

@@ -24,7 +24,7 @@ void AWFCGridManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AWFCGridManager::UpdateGridSetting(UWFCRolesManagerAsset* RolesManager)
+void AWFCGridManager::UpdateGridSetting()
 {
 	if(RolesManager)
 	{

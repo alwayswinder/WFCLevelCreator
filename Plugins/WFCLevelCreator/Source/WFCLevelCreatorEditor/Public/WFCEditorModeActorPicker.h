@@ -9,6 +9,7 @@
 
 
 DECLARE_DELEGATE_OneParam( FOnActorHovered, AActor* );
+DECLARE_DELEGATE_TwoParams( FOnActorFilled, AActor* , bool);
 
 
 class FEditorViewportClient;
@@ -67,8 +68,13 @@ public:
 	TSharedPtr<SWindow> CursorDecoratorWindow;
 
 	/** Delegates used to pick actors */
-	FOnActorSelected OnActorSelected;
+	FOnActorFilled OnActorFilled;
 	FOnActorHovered OnActorHovered;
 	FOnGetAllowedClasses OnGetAllowedClasses;
 	FOnShouldFilterActor OnShouldFilterActor;
+
+private:
+	bool bMouseButtonDown = false;
+
+	bool bShiftButtonDown = false;
 };
