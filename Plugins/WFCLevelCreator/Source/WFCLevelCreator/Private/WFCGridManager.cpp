@@ -24,6 +24,18 @@ void AWFCGridManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AWFCGridManager::InitGridAfterSpawn()
+{
+	UpdateGridSetting();
+	if(RolesManager)
+	{
+		for (auto GridXy : RolesManager->SpawnedIndex)
+		{
+			SpawnItemByIndex(GridXy.Key, GridXy.Value);
+		}
+	}
+}
+
 void AWFCGridManager::UpdateGridSetting()
 {
 	if(RolesManager)

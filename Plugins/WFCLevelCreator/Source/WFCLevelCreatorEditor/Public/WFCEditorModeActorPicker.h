@@ -69,12 +69,13 @@ public:
 
 	/** Delegates used to pick actors */
 	FOnActorFilled OnActorFilled;
+	FOnActorSelected OnActorSelected;
 	FOnActorHovered OnActorHovered;
 	FOnGetAllowedClasses OnGetAllowedClasses;
 	FOnShouldFilterActor OnShouldFilterActor;
 
 private:
 	bool bMouseButtonDown = false;
-
+	bool bAltButtonDown = false;
 	bool bShiftButtonDown = false;
 };

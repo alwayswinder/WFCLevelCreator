@@ -120,13 +120,13 @@ bool FWFCEdModeActorPicker::CapturedMouseMove(FEditorViewportClient* InViewportC
 				}
 				if(IsActorValid(Actor))
 				{
-					if(bMouseButtonDown && bShiftButtonDown)
-					{
-						OnActorFilled.ExecuteIfBound(Actor, false);
-					}
-					else if(bMouseButtonDown && !bShiftButtonDown)
+					if (bMouseButtonDown && !bShiftButtonDown)
 					{
 						OnActorFilled.ExecuteIfBound(Actor, true);
+					}
+					else if(bMouseButtonDown && bShiftButtonDown)
+					{
+						OnActorFilled.ExecuteIfBound(Actor, false);
 					}
 					PickState = EPickState::OverActor;
 				}
@@ -164,6 +164,25 @@ bool FWFCEdModeActorPicker::InputKey(FEditorViewportClient* ViewportClient, FVie
 	{
 		if (Key == EKeys::LeftMouseButton && Event == IE_Pressed)
 		{
+			int32 HitX = Viewport->GetMouseX();
+			int32 HitY = Viewport->GetMouseY();
+			HHitProxy* HitProxy = Viewport->GetHitProxy(HitX, HitY);
+			if (HitProxy != NULL && HitProxy->IsA(HActor::StaticGetType()))
+			{
+				HActor* ActorHit = static_cast<HActor*>(HitProxy);
+				if(ActorHit->Actor != NULL)
+				{
+					AActor* Actor = ActorHit->Actor;
+					while (Actor->IsChildActor())
+					{
+						Actor = Actor->GetParentActor();
+					}
+					if(IsActorValid(Actor))
+					{
+						OnActorSelected.ExecuteIfBound(Actor);
+					}
+				}
+			}
 			bMouseButtonDown = true;
 			return true;
 		}
@@ -180,6 +199,16 @@ bool FWFCEdModeActorPicker::InputKey(FEditorViewportClient* ViewportClient, FVie
 		else if (Key == EKeys::LeftShift && Event == IE_Released)
 		{
 			bShiftButtonDown = false;
+			return true;
+		}
+		else if (Key == EKeys::LeftAlt && Event == IE_Pressed)
+		{
+			bAltButtonDown = true;
+			return true;
+		}
+		else if (Key == EKeys::LeftAlt && Event == IE_Released)
+		{
+			bAltButtonDown = false;
 			return true;
 		}
 		else if(Key == EKeys::Escape && Event == IE_Pressed)
@@ -224,6 +253,7 @@ bool FWFCEdModeActorPicker::IsCompatibleWith(FEditorModeID OtherModeID) const
 void FWFCEdModeActorPicker::Exit()
 {
 	OnActorFilled = FOnActorFilled();
+	OnActorSelected = FOnActorSelected();
 	OnGetAllowedClasses = FOnGetAllowedClasses();
 	OnShouldFilterActor = FOnShouldFilterActor();
 

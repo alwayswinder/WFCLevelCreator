@@ -2,14 +2,10 @@
 
 
 #include "WFCRolesManagerToolkit.h"
-
-#include "ClassIconFinder.h"
 #include "EditorViewportTabContent.h"
-#include "LevelCreatorLibrary.h"
 #include "WFCRolesManager.h"
 #include "WFCRolesManagerEditorCommands.h"
 #include "WFCRolesManagerViewport.h"
-#include "Styling/SlateStyleRegistry.h"
 #include "Widgets/Layout/SScrollBox.h"
 
 #define LOCTEXT_NAMESPACE "WFCRolesmanagerEditorToolkit"
@@ -172,7 +168,7 @@ void FWFCRolesManagerToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager
 
 bool FWFCRolesManagerToolkit::OnRequestClose()
 {
-	return FAssetEditorToolkit::OnRequestClose();
+	return true;
 }
 
 TSharedRef<SDockTab> FWFCRolesManagerToolkit::SpawnTab_Viewport(const FSpawnTabArgs& Args)
@@ -290,10 +286,10 @@ void FWFCRolesManagerToolkit::BindCommands()
 		FCanExecuteAction(),
 		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedShowGrid));
 	
-	UICommandList->MapAction(Commands.FillGrid,
-		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::FillGrid),
-		FCanExecuteAction(),
-		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedFillGrid));
+	// UICommandList->MapAction(Commands.FillGrid,
+	// 	FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::FillGrid),
+	// 	FCanExecuteAction(),
+	// 	FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedFillGrid));
 }
 
 void FWFCRolesManagerToolkit::ExtendToolbar()
@@ -313,13 +309,11 @@ void FWFCRolesManagerToolkit::ExtendToolbar()
 void FWFCRolesManagerToolkit::FillToolbar(FToolBarBuilder& ToolbarBuilder,
 	const TSharedRef<FUICommandList> InToolkitCommands)
 {
-	const ISlateStyle* WFCUIStyle = FSlateStyleRegistry::FindSlateStyle(FWFCUIStyle::GetStyleSetName());
-
 	ToolbarBuilder.BeginSection("WFC");
 	{
 		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowGrid);
 
-		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().FillGrid);
+		//ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().FillGrid);
 
 	}
 	ToolbarBuilder.EndSection();
@@ -335,41 +329,34 @@ void FWFCRolesManagerToolkit::UpdateTilesSelectState()
 
 void FWFCRolesManagerToolkit::ShowGrid()
 {
-	if(bShowGrid)
+	if(WfcRolesManagerAssetRef->bShowGrid == true)
 	{
-		bShowGrid = false;
 		WfcRolesManagerAssetRef->WFCGridManagerRef->SetGridItemsHidenInEditor(true);
+		WfcRolesManagerAssetRef->bShowGrid = false;
+		WfcRolesManagerAssetRef->Modify();
 		GEditor->RedrawAllViewports();
 	}
 	else
 	{
-		bShowGrid = true;
 		WfcRolesManagerAssetRef->WFCGridManagerRef->SetGridItemsHidenInEditor(false);
+		WfcRolesManagerAssetRef->bShowGrid = true;
+		WfcRolesManagerAssetRef->Modify();
 		GEditor->RedrawAllViewports();
 	}
 }
 
-void FWFCRolesManagerToolkit::FillGrid()
-{
-	if(bFillGrid)
-	{
-		bFillGrid = false;
-		WfcRolesManagerAssetRef->bFillMode = false;
-	}
-	else
-	{
-		bFillGrid = true;
-		WfcRolesManagerAssetRef->bFillMode = true;
-	}
-}
+// void FWFCRolesManagerToolkit::FillGrid()
+// {
+//
+// }
 
 bool FWFCRolesManagerToolkit::IsPressedShowGrid() const
 {
-	return bShowGrid;
+	return WfcRolesManagerAssetRef->bShowGrid;
 }
 
 bool FWFCRolesManagerToolkit::IsPressedFillGrid() const
 {
-	return bFillGrid;
+	return WfcRolesManagerAssetRef->bShowGrid;
 }
 #undef LOCTEXT_NAMESPACE

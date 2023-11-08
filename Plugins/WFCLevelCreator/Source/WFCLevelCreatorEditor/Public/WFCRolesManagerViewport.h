@@ -68,12 +68,13 @@ public:
 	//
 	void OnActorFilled(AActor* ActorSelected, bool IsAdd = true);
 	void OnActorHovered(AActor* ActorSelected);
-
+	void OnActorSelected(AActor* ActorSelected);
 	//
 	// FEditorViewportClient interface
 	virtual void Tick(float DeltaSeconds) override;
 	// End of FEditorViewportClient
 
 	UWFCRolesManagerAsset* WFCRolesManagerAsset = nullptr;
-	AWFCGridItemBase* LastHoveredActor = nullptr;
+	AWFCGridItemBase* LastSelectedActor = nullptr;
+
 };

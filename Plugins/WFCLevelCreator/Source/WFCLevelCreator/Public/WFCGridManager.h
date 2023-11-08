@@ -24,15 +24,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid Item")
 	TObjectPtr<UWFCRolesManagerAsset> RolesManager;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid Item")
+	TObjectPtr<AWFCGridManager> GridManager;
+	
 public:
-	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
-	void OnHonvered(bool IsHovered);
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
 	void OnFilled(bool IsAdd);
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
-	void OnDragged(bool IsHovered);
+	void OnGridSelected(bool IsSelected);
+	
 };
 
 UCLASS()
@@ -54,7 +56,17 @@ public:
 public:
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
 	void ResetGrid();
+	
+	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
+	void SpawnItemByIndex(FIntVector Gridxy, int32 ClassIndex);
+	
+	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
+	void RemoveItem(FIntVector Gridxy);
+	
+	void InitGridAfterSpawn();
+	
 	void UpdateGridSetting();
+	
 	void SetGridItemsHidenInEditor(bool IsHid);
 	
 public:
@@ -72,4 +84,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	TMap<FIntVector, AWFCGridItemBase*> GridItemsSave;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	TMap<FIntVector, AWFCItemBase*> WFCItemsSave;
 };

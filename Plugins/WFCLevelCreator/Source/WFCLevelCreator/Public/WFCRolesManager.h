@@ -75,17 +75,33 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	int32 Num_Y = 3;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WFC Grid")
 	float GridSize = 100.f;
 	
+#if WITH_EDITOR
 public:
 	FOnInitThumbnailsDelegate OnInitThumbnailsDelegate;
 	void InitThumbnails();
 	FSlateBrush* GetBrushByIndex(int32 index);
-	TArray<UTexture2D*> Thumbnails;
+#endif
+	
+//#if WITH_EDITORONLY_DATA
+public:	
+	//UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
+	TArray<TObjectPtr<UTexture2D>> Thumbnails;
+	
+	//UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
 	TArray<FSlateBrush> Brushes;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	int32 SelectedClassIndex = 0;
 	
-public:
-	bool bFillMode = false;
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
+	bool bShowGrid = true;
+
+	UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
+	TMap<FIntVector, int32> SpawnedIndex;
+	
+//#endif
+	
 };
