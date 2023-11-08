@@ -6,11 +6,8 @@
 #include "InputCoreTypes.h"
 #include "EdMode.h"
 #include "ActorPickerMode.h"
-
-
-DECLARE_DELEGATE_OneParam( FOnActorHovered, AActor* );
-DECLARE_DELEGATE_TwoParams( FOnActorFilled, AActor* , bool);
-
+ 
+DECLARE_DELEGATE(FOnActorRotate);
 
 class FEditorViewportClient;
 class FViewport;
@@ -68,9 +65,9 @@ public:
 	TSharedPtr<SWindow> CursorDecoratorWindow;
 
 	/** Delegates used to pick actors */
-	FOnActorFilled OnActorFilled;
 	FOnActorSelected OnActorSelected;
-	FOnActorHovered OnActorHovered;
+	FOnActorRotate OnActorRotate;
+	
 	FOnGetAllowedClasses OnGetAllowedClasses;
 	FOnShouldFilterActor OnShouldFilterActor;
 

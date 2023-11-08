@@ -110,28 +110,10 @@ FWFCRolesManagerEditorViewportClient::FWFCRolesManagerEditorViewportClient(
 	 FWFCEdModeActorPicker* Mode = ModeTools->GetActiveModeTyped<FWFCEdModeActorPicker>(FWFCEdModeActorPicker::EM_WFCManager);
 	 if (ensure(Mode))
 	 {
-	 	Mode->OnActorFilled.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorFilled);
-	 	Mode->OnActorHovered.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorHovered);
 	 	Mode->OnActorSelected.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorSelected);
+	 	Mode->OnActorRotate.BindRaw(this, &FWFCRolesManagerEditorViewportClient::OnActorRotate);
+
 	 }
-}
-
-void FWFCRolesManagerEditorViewportClient::OnActorFilled(AActor* ActorSelected, bool IsAdd)
-{
-	if(!WFCRolesManagerAsset->bShowGrid)
-	{
-		return;
-	}
-	AWFCGridItemBase* SelectActor = Cast<AWFCGridItemBase>(ActorSelected);
-	if(SelectActor)
-	{
-		SelectActor->OnFilled(IsAdd);
-	}
-}
-
-void FWFCRolesManagerEditorViewportClient::OnActorHovered(AActor* ActorSelected)
-{
-
 }
 
 void FWFCRolesManagerEditorViewportClient::OnActorSelected(AActor* ActorSelected)
@@ -144,12 +126,23 @@ void FWFCRolesManagerEditorViewportClient::OnActorSelected(AActor* ActorSelected
 	if(SelectActor)
 	{
 		SelectActor->OnGridSelected(true);
+		WFCRolesManagerAsset->SelectedGrid = SelectActor->GridXY;
 		if(LastSelectedActor != nullptr && LastSelectedActor != SelectActor)
 		{
 			LastSelectedActor->OnGridSelected(false);
 		}
 		LastSelectedActor = SelectActor;
 	}
+}
+
+void FWFCRolesManagerEditorViewportClient::OnActorRotate()
+{
+	if(!WFCRolesManagerAsset->bShowGrid)
+	{
+		return;
+	}
+	WFCRolesManagerAsset->WFCGridManagerRef->RotateItem(WFCRolesManagerAsset->SelectedGrid);
+	WFCRolesManagerAsset->Modify();
 }
 
 void FWFCRolesManagerEditorViewportClient::Tick(float DeltaSeconds)

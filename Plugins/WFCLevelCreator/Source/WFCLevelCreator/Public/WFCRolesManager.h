@@ -85,7 +85,7 @@ public:
 	FSlateBrush* GetBrushByIndex(int32 index);
 #endif
 	
-//#if WITH_EDITORONLY_DATA
+#if WITH_EDITORONLY_DATA
 public:	
 	//UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
 	TArray<TObjectPtr<UTexture2D>> Thumbnails;
@@ -97,11 +97,18 @@ public:
 	int32 SelectedClassIndex = 0;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
+	FIntVector SelectedGrid;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	bool bShowGrid = true;
 
 	UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
 	TMap<FIntVector, int32> SpawnedIndex;
+
+	//0-0 1-90 2-180 3-270
+	UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
+	TMap<FIntVector, int32> RotationsIndex;
 	
-//#endif
+#endif
 	
 };

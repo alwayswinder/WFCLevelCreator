@@ -61,82 +61,12 @@ bool FWFCEdModeActorPicker::MouseLeave(FEditorViewportClient* ViewportClient, FV
 
 bool FWFCEdModeActorPicker::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Mouse Move!"));
-	//if (ViewportClient == GCurrentLevelEditingViewportClient)
-	// if (ViewportClient)
-	// {
-	// 	PickState = EPickState::OverViewport;
-	// 	HoveredActor.Reset();
-	//
-	// 	int32 HitX = Viewport->GetMouseX();
-	// 	int32 HitY = Viewport->GetMouseY();
-	// 	HHitProxy* HitProxy = Viewport->GetHitProxy(HitX, HitY);
-	// 	if (HitProxy != NULL && HitProxy->IsA(HActor::StaticGetType()))
-	// 	{
-	// 		HActor* ActorHit = static_cast<HActor*>(HitProxy);
-	// 		if(ActorHit->Actor != NULL)
-	// 		{
-	// 			AActor* Actor = ActorHit->Actor;
-	// 			while (Actor->IsChildActor())
-	// 			{
-	// 				Actor = Actor->GetParentActor();
-	// 			}
-	// 			if(IsActorValid(Actor))
-	// 			{
-	// 				//OnActorHovered.ExecuteIfBound(Actor);
-	// 			}
-	// 			HoveredActor = Actor;
-	// 			PickState =  IsActorValid(Actor) ? EPickState::OverActor : EPickState::OverIncompatibleActor;
-	// 		}
-	// 	}
-	// }
-	// else
-	// {
-	// 	PickState = EPickState::NotOverViewport;
-	// 	HoveredActor.Reset();
-	// }
-
 	return true;
 }
 
 bool FWFCEdModeActorPicker::CapturedMouseMove(FEditorViewportClient* InViewportClient, FViewport* InViewport,
 	int32 InMouseX, int32 InMouseY)
 {
-	if(bMouseButtonDown || bShiftButtonDown)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Captured Mouse Move!"));
-		int32 HitX = InViewport->GetMouseX();
-		int32 HitY = InViewport->GetMouseY();
-		HHitProxy* HitProxy = InViewport->GetHitProxy(HitX, HitY);
-		if (HitProxy != NULL && HitProxy->IsA(HActor::StaticGetType()))
-		{
-			HActor* ActorHit = static_cast<HActor*>(HitProxy);
-			if(ActorHit->Actor != NULL)
-			{
-				AActor* Actor = ActorHit->Actor;
-				while (Actor->IsChildActor())
-				{
-					Actor = Actor->GetParentActor();
-				}
-				if(IsActorValid(Actor))
-				{
-					if (bMouseButtonDown && !bShiftButtonDown)
-					{
-						OnActorFilled.ExecuteIfBound(Actor, true);
-					}
-					else if(bMouseButtonDown && bShiftButtonDown)
-					{
-						OnActorFilled.ExecuteIfBound(Actor, false);
-					}
-					PickState = EPickState::OverActor;
-				}
-			}
-		}
-		else
-		{
-			PickState = EPickState::NotOverViewport;
-		}
-	}
 	return FEdMode::CapturedMouseMove(InViewportClient, InViewport, InMouseX, InMouseY);
 }
 
@@ -184,6 +114,11 @@ bool FWFCEdModeActorPicker::InputKey(FEditorViewportClient* ViewportClient, FVie
 				}
 			}
 			bMouseButtonDown = true;
+			return true;
+		}
+		else if (Key == EKeys::SpaceBar && Event == IE_Pressed)
+		{
+			OnActorRotate.ExecuteIfBound();
 			return true;
 		}
 		else if (Key == EKeys::LeftMouseButton && Event == IE_Released)
@@ -252,7 +187,6 @@ bool FWFCEdModeActorPicker::IsCompatibleWith(FEditorModeID OtherModeID) const
 
 void FWFCEdModeActorPicker::Exit()
 {
-	OnActorFilled = FOnActorFilled();
 	OnActorSelected = FOnActorSelected();
 	OnGetAllowedClasses = FOnGetAllowedClasses();
 	OnShouldFilterActor = FOnShouldFilterActor();

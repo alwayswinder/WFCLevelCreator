@@ -35,6 +35,7 @@ void SMyTileItem::Construct(const FArguments& InArgs)
 
 void SMyTileItem::OnPressed()
 {
+	WFCAsset->WFCGridManagerRef->SpawnItemByIndex(WFCAsset->SelectedGrid, InputTileIndex);
 	WFCAsset->SelectedClassIndex = InputTileIndex;
 	Toolkit->UpdateTilesSelectState();
 }

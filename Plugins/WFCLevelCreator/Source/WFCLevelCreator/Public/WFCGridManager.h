@@ -34,7 +34,6 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
 	void OnGridSelected(bool IsSelected);
-	
 };
 
 UCLASS()
@@ -62,6 +61,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
 	void RemoveItem(FIntVector Gridxy);
+	
+	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
+	void RotateItem(FIntVector Gridxy);
 	
 	void InitGridAfterSpawn();
 	
