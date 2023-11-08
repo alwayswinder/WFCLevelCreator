@@ -7,7 +7,6 @@
 #include "WFCGridManager.generated.h"
 
 class AWFCItemBase;
-class UWFCTemplate;
 class FAdvancedPreviewScene;
 class UWFCRolesManagerAsset;
 class UWFCGridSettings;

@@ -4,8 +4,6 @@
 #include "WFCRolesManager.h"
 #include "LevelCreatorLibrary.h"
 #include "WFCItemBase.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "Misc/ScopedSlowTask.h"
 #include "UObject/ConstructorHelpers.h"
 
 UWFCRolesManagerAsset::UWFCRolesManagerAsset()

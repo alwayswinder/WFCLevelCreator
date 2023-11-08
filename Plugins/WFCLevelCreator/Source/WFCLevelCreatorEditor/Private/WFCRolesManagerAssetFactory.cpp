@@ -9,13 +9,11 @@
 #include "WFCRolesManager.h"
 #include "WFCItemBase.h"
 #include "Widgets/Layout/SExpandableArea.h"
-#include "Widgets/Layout/SWidgetSwitcher.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "Widgets/SWidget.h"
 #include "Input/Reply.h"
 #include "InputCoreTypes.h"
-#include "GameFramework/Character.h"
 
 #define LOCTEXT_NAMESPACE "WFCRolesManagerAssetFactory"
 

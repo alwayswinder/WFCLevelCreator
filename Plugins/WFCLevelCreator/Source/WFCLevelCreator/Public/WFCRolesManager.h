@@ -6,43 +6,11 @@
 #include "WFCGridManager.h"
 #include "WFCItemBase.h"
 #include "UObject/Object.h"
-#include "Engine/DataAsset.h"
 #include "WFCRolesManager.generated.h"
 
+class UWFCTemplateAsset;
+
 DECLARE_DELEGATE( FOnInitThumbnailsDelegate);
-
-UCLASS(BlueprintType)
-class UWFCTemplate : public UDataAsset
-{
-	GENERATED_BODY()
-public:
-	UFUNCTION(BlueprintCallable, Category = "WFC Tempalte")
-	void DataReset(float InItemsize, FIntVector InManagerSize, TArray<TSubclassOf<AWFCItemBase>> InitemsClass,
-		TArray<int> InItemsIndex, TArray<FVector> InItemsRotOffset)
-	{
-		ItemSize = InItemsize;
-		ManagerSize = InManagerSize;
-		itemsClass = InitemsClass;
-		ItemsIndex = InItemsIndex;
-		ItemsRotOffset = InItemsRotOffset;
-		Modify();
-	}
-public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	float ItemSize;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	FIntVector ManagerSize;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	TArray<TSubclassOf<AWFCItemBase>> itemsClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	TArray<int> ItemsIndex;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	TArray<FVector> ItemsRotOffset;
-};
 
 UCLASS(BlueprintType, Blueprintable, AutoExpandCategories = "WFCAssets")
 class WFCLEVELCREATOR_API UWFCRolesManagerAsset : public UObject
@@ -57,7 +25,7 @@ public:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Template")
-	TObjectPtr<UWFCTemplate> WFCTemplates;
+	TObjectPtr<UWFCTemplateAsset> WFCTemplates;
 	
 	void InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes);
 
