@@ -27,12 +27,15 @@ void AWFCGridManager::Tick(float DeltaTime)
 void AWFCGridManager::InitGridAfterSpawn()
 {
 	UpdateGridSetting();
+	ClearGridAll();
 	if(RolesManager)
 	{
 		for (auto GridXy : RolesManager->SpawnedIndex)
 		{
 			SpawnItemByIndex(GridXy.Key, GridXy.Value);
 		}
+		
+		SetGridItemsHidenInEditor(!(RolesManager->bShowGrid));
 	}
 }
 
@@ -44,6 +47,7 @@ void AWFCGridManager::UpdateGridSetting()
 		Num_Y = RolesManager->Num_Y;
 		GridSize = RolesManager->GridSize;
 		ResetGrid();
+		SetGridItemsHidenInEditor(!(RolesManager->bShowGrid));
 	}
 }
 
@@ -52,6 +56,14 @@ void AWFCGridManager::SetGridItemsHidenInEditor(bool IsHid)
 	for (auto GridItem : GridItemsSave)
 	{
 		GridItem.Value->SetIsTemporarilyHiddenInEditor(IsHid);
+	}
+}
+
+void AWFCGridManager::ClearGridAll()
+{
+	for (auto GridItem : GridItemsSave)
+	{
+		RemoveItem(GridItem.Key);
 	}
 }
 

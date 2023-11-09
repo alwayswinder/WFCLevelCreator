@@ -69,6 +69,8 @@ public:
 	void UpdateGridSetting();
 	
 	void SetGridItemsHidenInEditor(bool IsHid);
+
+	void ClearGridAll();
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")

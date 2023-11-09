@@ -10,7 +10,6 @@
 
 class UWFCTemplateAsset;
 
-DECLARE_DELEGATE( FOnInitThumbnailsDelegate);
 
 UCLASS(BlueprintType, Blueprintable, AutoExpandCategories = "WFCAssets")
 class WFCLEVELCREATOR_API UWFCRolesManagerAsset : public UObject
@@ -25,12 +24,22 @@ public:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Template")
-	TObjectPtr<UWFCTemplateAsset> WFCTemplates;
+	TObjectPtr<UWFCTemplateAsset> WFCTemplate;
 	
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Template")
+	void SaveToTemplate();
+	
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Template")
+	void LoadFromTemplate();
+	
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Template")
+	void ClearAll();
+public:
 	void InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC itme")
 	TArray<TSubclassOf<AWFCItemBase>> WFCItemClasses;
+	
 public:
 	UPROPERTY(EditAnywhere, Category = "WFC Grid", DisplayName = "WFCGridManager Source")
 	TSubclassOf<AWFCGridManager> WFCGridManagerClass = nullptr;
@@ -48,7 +57,6 @@ public:
 	
 #if WITH_EDITOR
 public:
-	FOnInitThumbnailsDelegate OnInitThumbnailsDelegate;
 	void InitThumbnails();
 	FSlateBrush* GetBrushByIndex(int32 index);
 #endif

@@ -112,8 +112,7 @@ void FWFCRolesManagerToolkit::InitWFCRolesManagerEditor(const EToolkitMode::Type
 	ExtendToolbar();
 	RegenerateMenusAndToolbars();
 
-	//
-	WfcRolesManagerAssetRef->OnInitThumbnailsDelegate.BindRaw(this, &FWFCRolesManagerToolkit::InitThumbnails);
+	
 }
 
 FName FWFCRolesManagerToolkit::GetToolkitFName() const

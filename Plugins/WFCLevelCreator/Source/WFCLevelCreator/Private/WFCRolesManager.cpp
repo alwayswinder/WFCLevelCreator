@@ -4,6 +4,7 @@
 #include "WFCRolesManager.h"
 #include "LevelCreatorLibrary.h"
 #include "WFCItemBase.h"
+#include "WFCTempalteAsset.h"
 #include "UObject/ConstructorHelpers.h"
 
 UWFCRolesManagerAsset::UWFCRolesManagerAsset()
@@ -29,10 +30,44 @@ void UWFCRolesManagerAsset::PostEditChangeProperty(FPropertyChangedEvent& Proper
 	}
 }
 
+void UWFCRolesManagerAsset::SaveToTemplate()
+{
+	if( WFCTemplate)
+	{
+		WFCTemplate->DataReset(Num_X, Num_Y, GridSize, WFCItemClasses, SpawnedIndex, RotationsIndex);
+	}
+}
+
+void UWFCRolesManagerAsset::LoadFromTemplate()
+{
+	if( WFCTemplate)
+	{
+		Num_X = WFCTemplate->Num_X;
+		Num_Y = WFCTemplate->Num_Y;
+		GridSize = WFCTemplate->GridSize;
+		WFCItemClasses = WFCTemplate->itemsClass;
+		SpawnedIndex = WFCTemplate->SpawnedIndex;
+		RotationsIndex = WFCTemplate->RotationsIndex;
+		Modify();
+
+		if(WFCGridManagerRef)
+		{
+			WFCGridManagerRef->InitGridAfterSpawn();
+		}
+	}
+}
+
+void UWFCRolesManagerAsset::ClearAll()
+{
+	if(WFCGridManagerRef)
+	{
+		WFCGridManagerRef->ClearGridAll();
+	}
+}
+
 void UWFCRolesManagerAsset::InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes)
 {
 	WFCItemClasses = classes;
-	OnInitThumbnailsDelegate.ExecuteIfBound();
 }
 
 void UWFCRolesManagerAsset::InitThumbnails()

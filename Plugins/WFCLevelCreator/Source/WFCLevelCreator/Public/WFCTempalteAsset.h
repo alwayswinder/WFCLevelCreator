@@ -17,29 +17,36 @@ public:
 	UWFCTemplateAsset();
 	
 	UFUNCTION(BlueprintCallable, Category = "WFC Tempalte")
-	void DataReset(float InItemsize, FIntVector InManagerSize, TArray<TSubclassOf<AWFCItemBase>> InitemsClass,
-		TArray<int> InItemsIndex, TArray<FVector> InItemsRotOffset)
+	void DataReset(int32 X, int32 Y, float Size, TArray<TSubclassOf<AWFCItemBase>> Classes,
+		TMap<FIntVector, int32> classIndex, TMap<FIntVector, int32> RotIndex)
 	{
-		ItemSize = InItemsize;
-		ManagerSize = InManagerSize;
-		itemsClass = InitemsClass;
-		ItemsIndex = InItemsIndex;
-		ItemsRotOffset = InItemsRotOffset;
+		Num_X = X;
+		Num_Y = Y;
+		GridSize = Size;
+		itemsClass = Classes;
+		SpawnedIndex = classIndex;
+		RotationsIndex = RotIndex;
 		Modify();
 	}
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	float ItemSize;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Template")
+	int32 Num_X = 3;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Template")
+	int32 Num_Y = 3;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	FIntVector ManagerSize;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WFC Template")
+	float GridSize = 100.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
 	TArray<TSubclassOf<AWFCItemBase>> itemsClass;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WFC Template")
+	TMap<FIntVector, int32> SpawnedIndex;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	TArray<int> ItemsIndex;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "WFC Template")
-	TArray<FVector> ItemsRotOffset;
+	//0-0 1-90 2-180 3-270
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WFC Template")
+	TMap<FIntVector, int32> RotationsIndex;
+	
 };

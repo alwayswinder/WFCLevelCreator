@@ -46,11 +46,5 @@ public:
 	virtual void Tick(float DeltaTime) override; 
 	
 public:
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "WFC Item")
-	bool CheckNeighborAdapt(AWFCItemBase *Neighbor);
-	
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "WFC Item")
-	void AutoAlign();
-
 	
 };
