@@ -111,8 +111,6 @@ void FWFCRolesManagerToolkit::InitWFCRolesManagerEditor(const EToolkitMode::Type
 	FAssetEditorToolkit::InitAssetEditor(Mode, InitToolkitHost, FName(TEXT("WFCRolesManagerEditorApp")), StandaloneDefaultLayout, bCreateDefaultToolbar, bCreateDefaultStandaloneMenu, ObjectToEdit);
 	ExtendToolbar();
 	RegenerateMenusAndToolbars();
-
-	
 }
 
 FName FWFCRolesManagerToolkit::GetToolkitFName() const
@@ -168,6 +166,10 @@ void FWFCRolesManagerToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager
 
 bool FWFCRolesManagerToolkit::OnRequestClose()
 {
+	if(WfcRolesManagerAssetRef)
+	{
+		WfcRolesManagerAssetRef->WFCGridManagerRef->Destroy();
+	}
 	return true;
 }
 
@@ -193,7 +195,7 @@ TSharedRef<SDockTab> FWFCRolesManagerToolkit::SpawnTab_Properties(const FSpawnTa
 {
 	check(Args.GetTabId() == PropertiesTabId);
 	InputVbx = SNew(SVerticalBox);
-	FillInputItemsView();
+	InitThumbnails();
 
 	DetailsViewTab =  SNew(SDockTab)
 		.Label(LOCTEXT("WFCRolesManagerEditorProperties_TabTitle", "Details"))
@@ -286,10 +288,10 @@ void FWFCRolesManagerToolkit::BindCommands()
 		FCanExecuteAction(),
 		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedShowGrid));
 	
-	// UICommandList->MapAction(Commands.FillGrid,
-	// 	FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::FillGrid),
-	// 	FCanExecuteAction(),
-	// 	FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedFillGrid));
+	UICommandList->MapAction(Commands.ShowDebug,
+		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::ShowDebug),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedShowDebug));
 }
 
 void FWFCRolesManagerToolkit::ExtendToolbar()
@@ -313,7 +315,7 @@ void FWFCRolesManagerToolkit::FillToolbar(FToolBarBuilder& ToolbarBuilder,
 	{
 		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowGrid);
 
-		//ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().FillGrid);
+		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowDebug);
 
 	}
 	ToolbarBuilder.EndSection();
@@ -345,18 +347,19 @@ void FWFCRolesManagerToolkit::ShowGrid()
 	}
 }
 
-// void FWFCRolesManagerToolkit::FillGrid()
-// {
-//
-// }
+void FWFCRolesManagerToolkit::ShowDebug()
+{
+	WfcRolesManagerAssetRef->bShowDebug = !WfcRolesManagerAssetRef->bShowDebug;
+}
+
 
 bool FWFCRolesManagerToolkit::IsPressedShowGrid() const
 {
 	return WfcRolesManagerAssetRef->bShowGrid;
 }
 
-bool FWFCRolesManagerToolkit::IsPressedFillGrid() const
+bool FWFCRolesManagerToolkit::IsPressedShowDebug() const
 {
-	return WfcRolesManagerAssetRef->bShowGrid;
+	return WfcRolesManagerAssetRef->bShowDebug;
 }
 #undef LOCTEXT_NAMESPACE

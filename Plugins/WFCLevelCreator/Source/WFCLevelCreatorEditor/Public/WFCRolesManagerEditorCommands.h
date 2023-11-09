@@ -13,7 +13,7 @@ public:
 
 	TSharedPtr<FUICommandInfo> ShowGrid;
 
-	TSharedPtr<FUICommandInfo> FillGrid;
+	TSharedPtr<FUICommandInfo> ShowDebug;
 
 	/** Register commands */
 	virtual void RegisterCommands() override;

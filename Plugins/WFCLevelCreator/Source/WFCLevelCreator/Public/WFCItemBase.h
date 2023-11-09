@@ -6,25 +6,13 @@
 #include "GameFramework/Actor.h"
 #include "WFCItemBase.generated.h"
 
-UCLASS()
-class WFCLEVELCREATOR_API AWFCNextDebugBase : public AActor
+
+//简单的连通性
+UENUM(BlueprintType)
+enum class EWFCLinkType : uint8
 {
-	GENERATED_BODY()
-public:
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "WFC Debug")
-	void ShowDebug();
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "WFC Debug")
-	void RemoveDebug();
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
-	TArray<TSubclassOf<AWFCItemBase>> ClassesDebug;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
-	TArray<int32> RotDebug;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
-	int32 GridIndex = 0;
+	Not = 0,//不同连接
+	Can = 1,//可以连接
 };
 
 
@@ -46,5 +34,9 @@ public:
 	virtual void Tick(float DeltaTime) override; 
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC item")
+	TObjectPtr<UTexture2D> ShowIcon;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC item")
+	TArray<EWFCLinkType> LinkTypes = {EWFCLinkType::Can, EWFCLinkType::Can, EWFCLinkType::Can,EWFCLinkType::Can};
 };

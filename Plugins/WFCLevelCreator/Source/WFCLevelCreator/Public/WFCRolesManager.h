@@ -75,15 +75,18 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	FIntVector SelectedGrid;
 	
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
 	bool bShowGrid = true;
 
-	UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
 	TMap<FIntVector, int32> SpawnedIndex;
 
 	//0-0 1-90 2-180 3-270
-	UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
 	TMap<FIntVector, int32> RotationsIndex;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
+	bool bShowDebug = false;
 	
 #endif
 	

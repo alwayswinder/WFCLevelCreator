@@ -42,18 +42,19 @@ void UWFCRolesManagerAsset::LoadFromTemplate()
 {
 	if( WFCTemplate)
 	{
+		WFCGridManagerRef->ClearGridAll();
 		Num_X = WFCTemplate->Num_X;
 		Num_Y = WFCTemplate->Num_Y;
 		GridSize = WFCTemplate->GridSize;
 		WFCItemClasses = WFCTemplate->itemsClass;
 		SpawnedIndex = WFCTemplate->SpawnedIndex;
 		RotationsIndex = WFCTemplate->RotationsIndex;
-		Modify();
 
 		if(WFCGridManagerRef)
 		{
 			WFCGridManagerRef->InitGridAfterSpawn();
 		}
+		Modify();
 	}
 }
 
@@ -68,6 +69,7 @@ void UWFCRolesManagerAsset::ClearAll()
 void UWFCRolesManagerAsset::InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes)
 {
 	WFCItemClasses = classes;
+	InitThumbnails();
 }
 
 void UWFCRolesManagerAsset::InitThumbnails()
@@ -75,17 +77,28 @@ void UWFCRolesManagerAsset::InitThumbnails()
 	Thumbnails.Empty();
 	Brushes.Empty();
 	int32 ImageRes = 64;
-
+	
 	for (auto itemClass : WFCItemClasses)
 	{
-		UTexture2D* ImageTmp = UTexture2D::CreateTransient(ImageRes, ImageRes);
-		ULevelCreatorLibrary::GetObjThumbnail(ImageRes*4, itemClass->ClassGeneratedBy, ImageTmp);
-		Thumbnails.Add(ImageTmp);
-
-		FSlateBrush TempBrushOutput;
-		TempBrushOutput.SetResourceObject(ImageTmp);
-		TempBrushOutput.ImageSize = FVector2D(ImageRes, ImageRes);
-		Brushes.Add(TempBrushOutput);
+		AWFCItemBase* DefaultObj = Cast<AWFCItemBase>(itemClass->GetDefaultObject());
+		if(DefaultObj != nullptr && DefaultObj->ShowIcon != nullptr)
+		{
+			Thumbnails.Add(DefaultObj->ShowIcon);
+			FSlateBrush TempBrushOutput;
+			TempBrushOutput.SetResourceObject(DefaultObj->ShowIcon);
+			TempBrushOutput.ImageSize = FVector2D(ImageRes, ImageRes);
+			Brushes.Add(TempBrushOutput);
+		}
+		else
+		{
+			UTexture2D* ImageTmp = UTexture2D::CreateTransient(ImageRes, ImageRes);
+			ULevelCreatorLibrary::GetObjThumbnail(ImageRes*4, itemClass->ClassGeneratedBy, ImageTmp);
+			Thumbnails.Add(ImageTmp);
+			FSlateBrush TempBrushOutput;
+			TempBrushOutput.SetResourceObject(ImageTmp);
+			TempBrushOutput.ImageSize = FVector2D(ImageRes, ImageRes);
+			Brushes.Add(TempBrushOutput);
+		}
 	}
 }
 

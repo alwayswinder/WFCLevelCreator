@@ -75,9 +75,9 @@ private:
 	
 	
 	void ShowGrid();
-	//void FillGrid();
+	void ShowDebug();
 	bool IsPressedShowGrid() const;
-	bool IsPressedFillGrid() const;
+	bool IsPressedShowDebug() const;
 	
 	
 	TSharedPtr<FEditorViewportTabContent> ViewportTabContent;

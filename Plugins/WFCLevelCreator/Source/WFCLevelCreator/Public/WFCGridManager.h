@@ -71,8 +71,9 @@ public:
 	void SetGridItemsHidenInEditor(bool IsHid);
 
 	void ClearGridAll();
-	
+
 public:
+	//config
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	TObjectPtr<UWFCRolesManagerAsset> RolesManager;
 	
@@ -90,4 +91,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	TMap<FIntVector, AWFCItemBase*> WFCItemsSave;
+	
+public:
+	//role
+	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Role")
+	bool IsAdaptLR(TSubclassOf<AWFCItemBase> leftclass, TSubclassOf<AWFCItemBase> rightclass, int32 leftrot, int32 rightrot);
 };
