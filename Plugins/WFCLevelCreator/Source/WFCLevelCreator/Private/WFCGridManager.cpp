@@ -32,7 +32,7 @@ void AWFCGridManager::InitGridAfterSpawn()
 	{
 		for (auto GridXy : RolesManager->SpawnedIndex)
 		{
-			SpawnItemByIndex(GridXy.Key, GridXy.Value);
+			SpawnItem(GridXy.Key, GridXy.Value, RolesManager->RotationsIndex[GridXy.Key]);
 		}
 		
 		SetGridItemsHidenInEditor(!(RolesManager->bShowGrid));

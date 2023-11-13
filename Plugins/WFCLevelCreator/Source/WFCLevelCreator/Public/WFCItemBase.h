@@ -15,7 +15,6 @@ enum class EWFCLinkType : uint8
 	Can = 1,//可以连接
 };
 
-
 UCLASS()
 class WFCLEVELCREATOR_API AWFCItemBase : public AActor
 {
@@ -38,5 +37,11 @@ public:
 	TObjectPtr<UTexture2D> ShowIcon;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC item")
+	float Probability = 1.0;
+	
+	//0-right,1-back, 2-left, 3-front
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC item")
 	TArray<EWFCLinkType> LinkTypes = {EWFCLinkType::Can, EWFCLinkType::Can, EWFCLinkType::Can,EWFCLinkType::Can};
+
+	
 };

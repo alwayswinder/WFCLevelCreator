@@ -27,10 +27,6 @@ public:
 	TObjectPtr<AWFCGridManager> GridManager;
 	
 public:
-	
-	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
-	void OnFilled(bool IsAdd);
-	
 	UFUNCTION(BlueprintImplementableEvent, Category = "WFC Grid Item")
 	void OnGridSelected(bool IsSelected);
 };
@@ -56,7 +52,7 @@ public:
 	void ResetGrid();
 	
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
-	void SpawnItemByIndex(FIntVector Gridxy, int32 ClassIndex);
+	void SpawnItem(FIntVector Gridxy, int32 ClassIndex, int32 Rot = 0);
 	
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
 	void RemoveItem(FIntVector Gridxy);
@@ -96,4 +92,7 @@ public:
 	//role
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Role")
 	bool IsAdaptLR(TSubclassOf<AWFCItemBase> leftclass, TSubclassOf<AWFCItemBase> rightclass, int32 leftrot, int32 rightrot);
+
+	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Role")
+	bool IsAdaptFB(TSubclassOf<AWFCItemBase> Frontclass, TSubclassOf<AWFCItemBase> Backclass, int32 Frontrot, int32 Backrot);
 };
