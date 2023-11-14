@@ -71,44 +71,16 @@ void UWFCRolesManagerAsset::ClearAll()
 	{
 		WFCGridManagerRef->ClearGridAll();
 	}
-	
-	AllTilesAdapt.Empty();
-	ClassNumFilled.Empty();
-	TargetFrequency.Empty();
-	CurrentFrequence.Empty();
-	
-	//get total frequency
-	float totalFrequency = 0;
-	for (auto itemClass : WFCItemClasses)
+
+	if(GenerateType == EWFCGenerateType::Roles)
 	{
-		AWFCItemBase* DefaultObj = Cast<AWFCItemBase>(itemClass->GetDefaultObject());
-		totalFrequency += DefaultObj->Probability;
+		InitWithRoles();
 	}
-	
-	FWFCTilesAdapt tmpTilesAdapt;
-	for (int c =0; c<WFCItemClasses.Num(); c++)
+	else
 	{
-		//fill all rot
-		for (int r=0; r<4; r++)
-		{
-			tmpTilesAdapt.TilesAdapt.Add(FWFCTileInfo(c, r));
-		}
-		AWFCItemBase* DefaultObj = Cast<AWFCItemBase>(WFCItemClasses[c]->GetDefaultObject());
-		//init Frequency
-		ClassNumFilled.Add(0);
-		TargetFrequency.Add(DefaultObj->Probability / totalFrequency);
-		CurrentFrequence.Add(0);
-	}
-	
-	for (int x=0; x<Num_X; x++)
-	{
-		for (int y=0; y<Num_Y; y++)
-		{
-			AllTilesAdapt.Add(FIntVector(x, y,0), tmpTilesAdapt);
-		}
+		InitWithPatterns();
 	}
 
-	NextIndex = StartIndex;
 }
 
 void UWFCRolesManagerAsset::InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes)
@@ -156,72 +128,160 @@ FSlateBrush* UWFCRolesManagerAsset::GetBrushByIndex(int32 index)
 	return nullptr;
 }
 
-void UWFCRolesManagerAsset::GenerateNeighborInfo()
+void UWFCRolesManagerAsset::Analyse()
 {
-	NeighborLR.Empty();
-	NeighborFB.Empty();
-	
-	FScopedSlowTask SlowTaskFB(static_cast<float>(WFCItemClasses.Num()), NSLOCTEXT("UnrealEd", "Generate", "Generate Neighbor Info..."));
-    SlowTaskFB.MakeDialog();
-    
-	for (int c1 =0; c1<WFCItemClasses.Num(); c1++)
+	if(GenerateType == EWFCGenerateType::Roles)
 	{
-		for (int r1=0; r1<4; r1++)
+		NeighborLR.Empty();
+		NeighborFB.Empty();
+	
+		FScopedSlowTask SlowTaskFB(static_cast<float>(WFCItemClasses.Num()), NSLOCTEXT("UnrealEd", "Generate", "Generate Neighbor Info..."));
+		SlowTaskFB.MakeDialog();
+    
+		for (int c1 =0; c1<WFCItemClasses.Num(); c1++)
 		{
-			for (int c2 =0; c2<WFCItemClasses.Num(); c2++)
+			for (int r1=0; r1<4; r1++)
 			{
-				for (int r2=0; r2<4; r2++)
+				for (int c2 =0; c2<WFCItemClasses.Num(); c2++)
 				{
-					if(WFCGridManagerRef->IsAdaptLR(WFCItemClasses[c1], WFCItemClasses[c2], r1, r2))
+					for (int r2=0; r2<4; r2++)
 					{
-						NeighborLR.Add(FWFCNeighborInfo(c1, r1, c2, r2));
-					}
+						if(WFCGridManagerRef->IsAdaptLR(WFCItemClasses[c1], WFCItemClasses[c2], r1, r2))
+						{
+							NeighborLR.Add(FWFCNeighborInfo(c1, r1, c2, r2));
+						}
 					
-					if(WFCGridManagerRef->IsAdaptFB(WFCItemClasses[c1], WFCItemClasses[c2], r1, r2))
+						if(WFCGridManagerRef->IsAdaptFB(WFCItemClasses[c1], WFCItemClasses[c2], r1, r2))
+						{
+							NeighborFB.Add(FWFCNeighborInfo(c1, r1, c2, r2));
+						}
+					}
+				}	
+			}
+			SlowTaskFB.EnterProgressFrame(1);
+		}
+	}
+	else
+	{
+		AllPatterns.Empty();
+		for (int x=0; x<Num_X; x++)
+		{
+			for (int y=0; y<Num_Y; y++)
+			{
+				//3*3 patterns to array
+				FWFCPatternsInfo tmpPatterns;
+				for (int dx=-1; dx<=1; dx++)
+				{
+					for (int dy=-1; dy<=1; dy++)
 					{
-						NeighborFB.Add(FWFCNeighborInfo(c1, r1, c2, r2));
+						FWFCTileInfo tmpTile;
+						FIntVector tmpIndex = FIntVector(x + dx, y + dy, 0);
+						if (SpawnedIndex.Contains(tmpIndex))
+						{
+							tmpTile.classIndex = SpawnedIndex[tmpIndex];
+							tmpTile.rot = RotationsIndex[tmpIndex];
+						}
+						else//out of grid
+						{
+							tmpTile.classIndex = -1;
+							tmpTile.rot = 0;
+						}
+						tmpPatterns.PatternTiles.Add(tmpTile);
 					}
 				}
-			}	
+
+				//check if same patterns alreay added
+				bool HasFind = false;
+				for (auto Patterns : AllPatterns)
+				{
+					bool IsSame = true;
+					for (int i=0; i<Patterns.PatternTiles.Num(); i++)
+					{
+						if(Patterns.PatternTiles[i].classIndex != tmpPatterns.PatternTiles[i].classIndex
+							|| Patterns.PatternTiles[i].rot != tmpPatterns.PatternTiles[i].rot)
+						{
+							IsSame = false;
+							break;
+						}
+					}
+					if(IsSame)
+					{
+						HasFind = true;
+						break;
+					}
+				}	
+				if(!HasFind)
+				{
+					AllPatterns.Add(tmpPatterns);
+				}
+			}
 		}
-		SlowTaskFB.EnterProgressFrame(1);
 	}
 	Modify();
 }
 
-void UWFCRolesManagerAsset::DebugNeighborLR()
+void UWFCRolesManagerAsset::AutoFillEmpty()
+{
+	for (int x=0; x<Num_X; x++)
+	{
+		for (int y=0; y<Num_Y; y++)
+		{
+			if(!SpawnedIndex.Contains(FIntVector(x, y, 0)))
+			{
+				WFCGridManagerRef->SpawnItem(FIntVector(x, y, 0), SelectedClassIndex, 0);
+			}
+		}
+	}
+}
+
+void UWFCRolesManagerAsset::DebugShow()
 {
 	WFCGridManagerRef->ClearGridAll();
-	
-	if(NeighborLR.IsValidIndex(NeighborIndex))
+
+	switch (DebugType)
 	{
-		FWFCNeighborInfo NeighborShow = NeighborLR[NeighborIndex];
+	case EWFCDebugType::NeighborLR:
+		if(NeighborLR.IsValidIndex(DebugIndex))
+		{
+			FWFCNeighborInfo NeighborShow = NeighborLR[DebugIndex];
 		
-		WFCGridManagerRef->SpawnItem(FIntVector(0,0,0), NeighborShow.class_1, NeighborShow.rot_1);
+			WFCGridManagerRef->SpawnItem(FIntVector(0,0,0), NeighborShow.class_1, NeighborShow.rot_1);
 		
-		WFCGridManagerRef->SpawnItem(FIntVector(0,1,0), NeighborShow.class_2, NeighborShow.rot_2);
+			WFCGridManagerRef->SpawnItem(FIntVector(0,1,0), NeighborShow.class_2, NeighborShow.rot_2);
+		}
+		break;
+	case EWFCDebugType::NeighborFB:
+		if(NeighborFB.IsValidIndex(DebugIndex))
+		{
+			FWFCNeighborInfo NeighborShow = NeighborFB[DebugIndex];
+		
+			WFCGridManagerRef->SpawnItem(FIntVector(1,0,0), NeighborShow.class_1, NeighborShow.rot_1);
+		
+			WFCGridManagerRef->SpawnItem(FIntVector(0,0,0), NeighborShow.class_2, NeighborShow.rot_2);
+		}
+		break;
+	case EWFCDebugType::Patterns:
+		break;
 	}
-	NeighborIndex++;
+	
+	DebugIndex++;
 	Modify();
 }
 
-void UWFCRolesManagerAsset::DebugNeighborFb()
-{
-	WFCGridManagerRef->ClearGridAll();
-	
-	if(NeighborFB.IsValidIndex(NeighborIndex))
-	{
-		FWFCNeighborInfo NeighborShow = NeighborFB[NeighborIndex];
-		
-		WFCGridManagerRef->SpawnItem(FIntVector(1,0,0), NeighborShow.class_1, NeighborShow.rot_1);
-		
-		WFCGridManagerRef->SpawnItem(FIntVector(0,0,0), NeighborShow.class_2, NeighborShow.rot_2);
-	}
-	NeighborIndex++;
-	Modify();
-}
 
 void UWFCRolesManagerAsset::GenerateItem()
+{
+	if(GenerateType == EWFCGenerateType::Roles)
+	{
+		GenerateWithRoles();
+	}
+	else
+	{
+		GenerateWithPatterns();
+	}
+}
+
+void UWFCRolesManagerAsset::GenerateWithRoles()
 {
 	if(AllTilesAdapt.Num() > 0 && AllTilesAdapt.Contains(NextIndex))
 	{
@@ -346,6 +406,12 @@ void UWFCRolesManagerAsset::GenerateItem()
 					NextIndex = TileAdapt.Key;
 				}
 			}
+			
+			//auto next?
+			if(!GenerateStep)
+			{
+				GenerateWithRoles();
+			}
 		}
 		else//has none;  
 		{
@@ -357,6 +423,78 @@ void UWFCRolesManagerAsset::GenerateItem()
 		//all has filled  or some one errer!
 		//todo!
 	}
+}
+
+void UWFCRolesManagerAsset::GenerateWithPatterns()
+{
+	
+}
+
+void UWFCRolesManagerAsset::InitWithRoles()
+{
+	AllTilesAdapt.Empty();
+	ClassNumFilled.Empty();
+	TargetFrequency.Empty();
+	CurrentFrequence.Empty();
+	
+	//get total frequency
+	float totalFrequency = 0;
+	for (auto itemClass : WFCItemClasses)
+	{
+		AWFCItemBase* DefaultObj = Cast<AWFCItemBase>(itemClass->GetDefaultObject());
+		totalFrequency += DefaultObj->Probability;
+	}
+	
+	FWFCTilesAdapt tmpTilesAdapt;
+	for (int c =0; c<WFCItemClasses.Num(); c++)
+	{
+		//fill all rot
+		for (int r=0; r<4; r++)
+		{
+			tmpTilesAdapt.TilesAdapt.Add(FWFCTileInfo(c, r));
+		}
+		AWFCItemBase* DefaultObj = Cast<AWFCItemBase>(WFCItemClasses[c]->GetDefaultObject());
+		//init Frequency
+		ClassNumFilled.Add(0);
+		TargetFrequency.Add(DefaultObj->Probability / totalFrequency);
+		CurrentFrequence.Add(0);
+	}
+	
+	for (int x=0; x<Num_X; x++)
+	{
+		for (int y=0; y<Num_Y; y++)
+		{
+			AllTilesAdapt.Add(FIntVector(x, y,0), tmpTilesAdapt);
+		}
+	}
+
+	NextIndex = StartIndex;
+}
+
+void UWFCRolesManagerAsset::InitWithPatterns()
+{
+	AllTilesAdapt.Empty();
+	FWFCTilesAdapt tmpTilesAdapt;
+	for (int c =0; c<WFCItemClasses.Num(); c++)
+	{
+		//fill all rot
+		for (int r=0; r<4; r++)
+		{
+			tmpTilesAdapt.TilesAdapt.Add(FWFCTileInfo(c, r));
+		}
+	}
+	
+	for (int x=0; x<Num_X; x++)
+	{
+		for (int y=0; y<Num_Y; y++)
+		{
+			AllTilesAdapt.Add(FIntVector(x, y,0), tmpTilesAdapt);
+		}
+	}
+	NextIndex = StartIndex;
+
+	//get start patterns adapt
+	
 }
 
 

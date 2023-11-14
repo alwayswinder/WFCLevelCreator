@@ -11,8 +11,10 @@
 UENUM(BlueprintType)
 enum class EWFCLinkType : uint8
 {
-	Not = 0,//不同连接
-	Can = 1,//可以连接
+	Type_1 = 0,//
+	Type_2 = 1,//
+	Type_3 = 2,
+	Type_4 = 3,
 };
 
 UCLASS()
@@ -41,7 +43,7 @@ public:
 	
 	//0-right,1-back, 2-left, 3-front
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC item")
-	TArray<EWFCLinkType> LinkTypes = {EWFCLinkType::Can, EWFCLinkType::Can, EWFCLinkType::Can,EWFCLinkType::Can};
+	TArray<EWFCLinkType> LinkTypes = {EWFCLinkType::Type_1, EWFCLinkType::Type_1, EWFCLinkType::Type_1,EWFCLinkType::Type_1};
 
 	
 };

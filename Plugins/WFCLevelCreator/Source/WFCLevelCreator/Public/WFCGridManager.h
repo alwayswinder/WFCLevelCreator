@@ -60,6 +60,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, CallInEditor, BlueprintCallable, Category = "WFC Grid")
 	void RotateItem(FIntVector Gridxy);
 	
+	UFUNCTION(BlueprintCallable, Category = "WFC Grid")
 	void InitGridAfterSpawn();
 	
 	void UpdateGridSetting();
@@ -73,19 +74,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
 	TObjectPtr<UWFCRolesManagerAsset> RolesManager;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	int32 Num_X = 3;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	int32 Num_Y = 3;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	float GridSize = 100.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	TMap<FIntVector, AWFCGridItemBase*> GridItemsSave;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	TMap<FIntVector, AWFCItemBase*> WFCItemsSave;
 	
 public:

@@ -10,6 +10,23 @@
 
 class UWFCTemplateAsset;
 
+
+UENUM(BlueprintType)
+enum class EWFCGenerateType : uint8
+{
+	Roles = 0,// from link type
+	Patterns = 1,// from template
+};
+
+UENUM(BlueprintType)
+enum class EWFCDebugType : uint8
+{
+	NeighborLR = 0, 
+	NeighborFB = 1,
+	Patterns = 2,
+};
+
+
 USTRUCT(BlueprintType)
 struct FWFCTileInfo
 {
@@ -40,6 +57,30 @@ public:
 	}
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Tile")
 	TArray<FWFCTileInfo> TilesAdapt;
+};
+
+USTRUCT(BlueprintType)
+struct FWFCPatternsInfo
+{
+	GENERATED_BODY()
+public:
+	FWFCPatternsInfo(){};
+	FWFCPatternsInfo(TArray<FWFCTileInfo> InArray)
+	{
+		PatternTiles = InArray;
+	}
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Tile")
+	TArray<FWFCTileInfo> PatternTiles;
+};
+
+USTRUCT(BlueprintType)
+struct FWFCPatternsAdapt
+{
+	GENERATED_BODY()
+public:
+	FWFCPatternsAdapt(){};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Tile")
+	TArray<int32> PatternAdapts;
 };
 
 USTRUCT(BlueprintType)
@@ -102,6 +143,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "WFC Grid", DisplayName = "WFCGridManager Source")
 	TSubclassOf<AWFCGridManager> WFCGridManagerClass = nullptr;
 	
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
 	TObjectPtr<AWFCGridManager> WFCGridManagerRef = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")
@@ -113,80 +155,97 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WFC Grid")
 	float GridSize = 100.f;
 	
-#if WITH_EDITOR
+
 public:
 	void InitThumbnails();
 	FSlateBrush* GetBrushByIndex(int32 index);
-#endif
-	
-#if WITH_EDITORONLY_DATA
-public:	
-	//UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
+
+public:
+	//Editor
 	TArray<TObjectPtr<UTexture2D>> Thumbnails;
 	
-	//UPROPERTY( BlueprintReadWrite, Category = "WFC Grid")
 	TArray<FSlateBrush> Brushes;
 	
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Editor")
 	int32 SelectedClassIndex = 0;
 	
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Grid")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Editor")
 	FIntVector SelectedGrid;
 	
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Debug")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Editor")
 	bool bShowGrid = true;
 		
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Debug")
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Editor")
 	bool bShowDebug = false;
 	
-#endif
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Debug")
-	TMap<FIntVector, int32> SpawnedIndex;
-
-	//0-0 1-90 2-180 3-270
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Debug")
-	TMap<FIntVector, int32> RotationsIndex;
-
 public:
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Generate")
-	void GenerateNeighborInfo();
+	//Debug
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
+	int32 DebugIndex = 0;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
-	int32 NeighborIndex = 0;
+	EWFCDebugType DebugType = EWFCDebugType::NeighborLR;
 	
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Debug")
-	void DebugNeighborLR();
+	void DebugShow();
 
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Debug")
-	void DebugNeighborFb();
-	//neighbor info
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
-	TArray<FWFCNeighborInfo> NeighborLR;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
-	TArray<FWFCNeighborInfo> NeighborFB;
-	
 public:
-	//generate
+	//Generate
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
+	EWFCGenerateType GenerateType = EWFCGenerateType::Roles;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
+	bool GenerateStep = false;
+	
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Generate")
+	void Analyse();
+	
+	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Generate")
+	void AutoFillEmpty();
+	
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Generate")
 	void GenerateItem();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
-	TMap<FIntVector, FWFCTilesAdapt> AllTilesAdapt;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	FIntVector StartIndex;
-private:
-	FIntVector NextIndex;
 
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Generate")
+	TMap<FIntVector, int32> SpawnedIndex;
 	
-public:
+	//0-0 1-90 2-180 3-270
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Generate")
+	TMap<FIntVector, int32> RotationsIndex;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	TArray<float> TargetFrequency;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	TArray<float> CurrentFrequence;
 	
+	//Roles
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Roles")
+	TMap<FIntVector, FWFCTilesAdapt> AllTilesAdapt;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Roles")
+	TArray<FWFCNeighborInfo> NeighborLR;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Roles")
+	TArray<FWFCNeighborInfo> NeighborFB;
+
+	//patterns
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Patterns")
+	TArray<FWFCPatternsInfo> AllPatterns;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Patterns")
+	TMap<FIntVector, FWFCPatternsAdapt> AllPatternsAdapt;
+	
 private:
+	FIntVector NextIndex;
 	TArray<int32> ClassNumFilled;
+
+	void GenerateWithRoles();
+	void GenerateWithPatterns();
+	void InitWithRoles();
+	void InitWithPatterns();
+	
 };
