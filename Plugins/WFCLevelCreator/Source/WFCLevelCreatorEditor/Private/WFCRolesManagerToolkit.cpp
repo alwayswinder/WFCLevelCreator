@@ -166,10 +166,6 @@ void FWFCRolesManagerToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager
 
 bool FWFCRolesManagerToolkit::OnRequestClose()
 {
-	if(WfcRolesManagerAssetRef)
-	{
-		WfcRolesManagerAssetRef->WFCGridManagerRef->Destroy();
-	}
 	return true;
 }
 
@@ -292,6 +288,11 @@ void FWFCRolesManagerToolkit::BindCommands()
 		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::ShowDebug),
 		FCanExecuteAction(),
 		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedShowDebug));
+
+	UICommandList->MapAction(Commands.ShowDecorations,
+		FExecuteAction::CreateSP(this, &FWFCRolesManagerToolkit::ShowDecorations),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateSP(this, &FWFCRolesManagerToolkit::IsPressedShowDecorations));
 }
 
 void FWFCRolesManagerToolkit::ExtendToolbar()
@@ -316,6 +317,8 @@ void FWFCRolesManagerToolkit::FillToolbar(FToolBarBuilder& ToolbarBuilder,
 		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowGrid);
 
 		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowDebug);
+
+		ToolbarBuilder.AddToolBarButton(FWFCRolesManagerEditorCommands::Get().ShowDecorations);
 
 	}
 	ToolbarBuilder.EndSection();
@@ -352,6 +355,12 @@ void FWFCRolesManagerToolkit::ShowDebug()
 	WfcRolesManagerAssetRef->bShowDebug = !WfcRolesManagerAssetRef->bShowDebug;
 }
 
+void FWFCRolesManagerToolkit::ShowDecorations()
+{
+	WfcRolesManagerAssetRef->bShowDecorations = !WfcRolesManagerAssetRef->bShowDecorations;
+	WfcRolesManagerAssetRef->WFCGridManagerRef->UpdateAllItemDecorationsVisible();
+}
+
 
 bool FWFCRolesManagerToolkit::IsPressedShowGrid() const
 {
@@ -361,5 +370,10 @@ bool FWFCRolesManagerToolkit::IsPressedShowGrid() const
 bool FWFCRolesManagerToolkit::IsPressedShowDebug() const
 {
 	return WfcRolesManagerAssetRef->bShowDebug;
+}
+
+bool FWFCRolesManagerToolkit::IsPressedShowDecorations() const
+{
+	return WfcRolesManagerAssetRef->bShowDecorations;
 }
 #undef LOCTEXT_NAMESPACE

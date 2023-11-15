@@ -178,6 +178,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "WFC Editor")
 	bool bShowDebug = false;
 	
+	UPROPERTY(BlueprintReadWrite, Category = "WFC Editor")
+	bool bShowDecorations= false;
+	
 public:
 	//Debug
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Debug")
@@ -209,11 +212,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	FIntVector StartIndex;
 
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Generate")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Generate")
 	TMap<FIntVector, int32> SpawnedIndex;
 	
 	//0-0 1-90 2-180 3-270
-	UPROPERTY(BlueprintReadWrite, Category = "WFC Generate")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Generate")
 	TMap<FIntVector, int32> RotationsIndex;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
@@ -222,6 +225,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	TArray<float> CurrentFrequence;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
+	TArray<int32> ClassNumFilled;
 	//Roles
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Roles")
 	TMap<FIntVector, FWFCTilesAdapt> AllTilesAdapt;
@@ -237,15 +242,15 @@ public:
 	TArray<FWFCPatternsInfo> AllPatterns;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate | Patterns")
-	TMap<FIntVector, FWFCPatternsAdapt> AllPatternsAdapt;
+	TMap<FIntVector, FWFCPatternsAdapt> PatternsAdapts;
 	
 private:
 	FIntVector NextIndex;
-	TArray<int32> ClassNumFilled;
 
 	void GenerateWithRoles();
 	void GenerateWithPatterns();
 	void InitWithRoles();
 	void InitWithPatterns();
-	
+
+	bool IsValidIndex(FIntVector inIndex);
 };

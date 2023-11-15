@@ -45,5 +45,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC item")
 	TArray<EWFCLinkType> LinkTypes = {EWFCLinkType::Type_1, EWFCLinkType::Type_1, EWFCLinkType::Type_1,EWFCLinkType::Type_1};
 
-	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "WFC item")
+	void UpdateDecorationsVisible(bool newVisible);
 };

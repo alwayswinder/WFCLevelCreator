@@ -70,6 +70,8 @@ void UWFCRolesManagerAsset::ClearAll()
 	if(WFCGridManagerRef)
 	{
 		WFCGridManagerRef->ClearGridAll();
+		SpawnedIndex.Empty();
+		RotationsIndex.Empty();
 	}
 
 	if(GenerateType == EWFCGenerateType::Roles)
@@ -80,7 +82,6 @@ void UWFCRolesManagerAsset::ClearAll()
 	{
 		InitWithPatterns();
 	}
-
 }
 
 void UWFCRolesManagerAsset::InitItemClasses(TArray<TSubclassOf<AWFCItemBase>> classes)
@@ -160,6 +161,7 @@ void UWFCRolesManagerAsset::Analyse()
 			}
 			SlowTaskFB.EnterProgressFrame(1);
 		}
+		InitWithRoles();
 	}
 	else
 	{
@@ -216,6 +218,7 @@ void UWFCRolesManagerAsset::Analyse()
 				}
 			}
 		}
+		InitWithPatterns();
 	}
 	Modify();
 }
@@ -427,7 +430,14 @@ void UWFCRolesManagerAsset::GenerateWithRoles()
 
 void UWFCRolesManagerAsset::GenerateWithPatterns()
 {
-	
+	if (PatternsAdapts.Num() > 0 && PatternsAdapts.Contains(NextIndex))
+	{
+		
+	}
+	else//end or error!
+	{
+		//todo!
+	}
 }
 
 void UWFCRolesManagerAsset::InitWithRoles()
@@ -493,8 +503,63 @@ void UWFCRolesManagerAsset::InitWithPatterns()
 	}
 	NextIndex = StartIndex;
 
+	FWFCPatternsInfo NextPattern;
 	//get start patterns adapt
-	
+	for (int dx=-1; dx<=1; dx++)
+	{
+		for (int dy=-1; dy<=1; dy++)
+		{
+			FIntVector TmpIndex = FIntVector(NextIndex.X + dx, NextIndex.Y + dy, 0);
+			if(IsValidIndex(TmpIndex))
+			{
+				//-2 to mark can fill any tiles
+				NextPattern.PatternTiles.Add(FWFCTileInfo(-2, 0));
+			}
+			else
+			{
+				//out of grid
+				NextPattern.PatternTiles.Add(FWFCTileInfo(-1, 0));
+			}
+		}
+	}
+	FWFCPatternsAdapt tmpPatternsIndex;
+	for (int i=0; i<AllPatterns.Num(); i++)
+	{
+		bool IsSame = true;
+		for (int j=0; j<NextPattern.PatternTiles.Num(); j++)
+		{
+			if(NextPattern.PatternTiles[j].classIndex == -2)
+			{
+				if(AllPatterns[i].PatternTiles[j].classIndex == -1)
+				{
+					IsSame = false;
+					break;
+				}
+			}
+			else//-1
+			{
+				if(AllPatterns[i].PatternTiles[j].classIndex != -1)
+				{
+					IsSame = false;
+					break;
+				}
+			}
+		}
+		if(IsSame)
+		{
+			tmpPatternsIndex.PatternAdapts.Add(i);
+		}
+	}
+	PatternsAdapts.Add(NextIndex, tmpPatternsIndex);
+}
+
+bool UWFCRolesManagerAsset::IsValidIndex(FIntVector inIndex)
+{
+	if(inIndex.X < 0 || inIndex.X >= Num_X || inIndex.Y < 0 || inIndex.Y >= Num_Y)
+	{
+		return false;
+	}
+	return  true;
 }
 
 

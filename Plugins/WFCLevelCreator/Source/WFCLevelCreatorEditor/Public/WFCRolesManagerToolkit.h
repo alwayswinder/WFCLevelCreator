@@ -76,9 +76,12 @@ private:
 	
 	void ShowGrid();
 	void ShowDebug();
+	void ShowDecorations();
+
 	bool IsPressedShowGrid() const;
 	bool IsPressedShowDebug() const;
-	
+	bool IsPressedShowDecorations() const;
+
 	
 	TSharedPtr<FEditorViewportTabContent> ViewportTabContent;
 	

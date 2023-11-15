@@ -14,6 +14,8 @@ public:
 	TSharedPtr<FUICommandInfo> ShowGrid;
 
 	TSharedPtr<FUICommandInfo> ShowDebug;
+	
+	TSharedPtr<FUICommandInfo> ShowDecorations;
 
 	/** Register commands */
 	virtual void RegisterCommands() override;

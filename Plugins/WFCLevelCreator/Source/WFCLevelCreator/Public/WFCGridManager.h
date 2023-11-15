@@ -69,6 +69,8 @@ public:
 
 	void ClearGridAll();
 
+	void UpdateAllItemDecorationsVisible();
+
 public:
 	//config
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WFC Grid")

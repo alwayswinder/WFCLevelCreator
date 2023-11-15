@@ -47,6 +47,8 @@ void FWFCUIStyle::Initialize()
 	// WaterWaves Asset Editor
 	StyleSet->Set("WFCRolesManagerEditor.ShowGrid", new IMAGE_BRUSH("Icons/icon_ExtractSprites_40x", Icon40x40));
 	StyleSet->Set("WFCRolesManagerEditor.ShowDebug", new IMAGE_BRUSH("Icons/WaterLandscapeBrush_x256", Icon40x40));
+	StyleSet->Set("WFCRolesManagerEditor.ShowDecorations", new IMAGE_BRUSH("Icons/WaterBodyIsland_x256", Icon40x40));
+
 	FSlateStyleRegistry::RegisterSlateStyle(*StyleSet.Get());
 };
 

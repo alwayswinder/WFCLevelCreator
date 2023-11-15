@@ -67,6 +67,14 @@ void AWFCGridManager::ClearGridAll()
 	}
 }
 
+void AWFCGridManager::UpdateAllItemDecorationsVisible()
+{
+	for (auto Item : WFCItemsSave)
+	{
+		Item.Value->UpdateDecorationsVisible(RolesManager->bShowDecorations);
+	}
+}
+
 
 
 
