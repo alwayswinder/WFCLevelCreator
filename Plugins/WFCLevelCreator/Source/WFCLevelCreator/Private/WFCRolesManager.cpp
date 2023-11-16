@@ -264,6 +264,20 @@ void UWFCRolesManagerAsset::DebugShow()
 		}
 		break;
 	case EWFCDebugType::Patterns:
+		if (AllPatterns.IsValidIndex(DebugIndex))
+		{
+			FWFCPatternsInfo PatternTiles = AllPatterns[DebugIndex];
+			int index = 0;
+			for (int x=0; x<3; x++)
+			{
+				for (int y=0; y<3; y++)
+				{
+					WFCGridManagerRef->SpawnItem(FIntVector(x,y,0), PatternTiles.PatternTiles[index].classIndex,
+						 PatternTiles.PatternTiles[index].rot);
+					index++;
+				}
+			}
+		}
 		break;
 	}
 	
@@ -430,14 +444,57 @@ void UWFCRolesManagerAsset::GenerateWithRoles()
 
 void UWFCRolesManagerAsset::GenerateWithPatterns()
 {
-	if (PatternsAdapts.Num() > 0 && PatternsAdapts.Contains(NextIndex))
+	if (PatternsAdapts.Num() > 0 && PatternsAdapts.Contains(NextIndex) && PatternsAdapts[NextIndex].PatternAdapts.Num() > 0)
 	{
+		//select one from adapt
+		TArray<int32> PatternsIndex = PatternsAdapts[NextIndex].PatternAdapts;
+		int selectIndex = FMath::RandRange(0, PatternsIndex.Num()-1);
+		FWFCPatternsInfo SelectedPattern = AllPatterns[PatternsIndex[selectIndex]];
+		FWFCTileInfo FillTile = SelectedPattern.PatternTiles[SelectedPattern.PatternTiles.Num() / 2];
 		
+		WFCGridManagerRef->SpawnItem(NextIndex, FillTile.classIndex, FillTile.rot);
+		
+		PatternsAdapts.Remove(NextIndex);
+
+		//update neighbor
+		for (int dx=-1; dx<=1; dx++)
+		{
+			for (int dy=-1; dy<=1; dy++)
+			{
+				FIntVector TmpIndex = FIntVector(NextIndex.X + dx, NextIndex.Y + dy, 0);
+				// valid and  not filled
+				if(IsValidIndex(TmpIndex) && !SpawnedIndex.Contains(TmpIndex))
+				{
+					FWFCPatternsInfo PatternTiles = GetPatternTiles(TmpIndex);
+			
+					FWFCPatternsAdapt tmpPatternsIndex = FilterAdaptPatternsIndex(TmpIndex,PatternTiles);
+			
+					PatternsAdapts.Add(TmpIndex, tmpPatternsIndex);
+				}
+			}
+		}
+
+		//Update nextindex
+		int minAdaptNum = AllPatterns.Num() + 1;
+		for (auto patterns : PatternsAdapts)
+		{
+			if(patterns.Value.PatternAdapts.Num() < minAdaptNum && patterns.Value.PatternAdapts.Num() > 0)
+			{
+				minAdaptNum = patterns.Value.PatternAdapts.Num();
+				NextIndex = patterns.Key;
+			}
+		}
+
+		if(!GenerateStep)
+		{
+			GenerateWithPatterns();
+		}
 	}
 	else//end or error!
 	{
 		//todo!
 	}
+	Modify();
 }
 
 void UWFCRolesManagerAsset::InitWithRoles()
@@ -483,52 +540,80 @@ void UWFCRolesManagerAsset::InitWithRoles()
 
 void UWFCRolesManagerAsset::InitWithPatterns()
 {
-	AllTilesAdapt.Empty();
-	FWFCTilesAdapt tmpTilesAdapt;
-	for (int c =0; c<WFCItemClasses.Num(); c++)
-	{
-		//fill all rot
-		for (int r=0; r<4; r++)
-		{
-			tmpTilesAdapt.TilesAdapt.Add(FWFCTileInfo(c, r));
-		}
-	}
+	PatternsAdapts.Empty();
 	
 	for (int x=0; x<Num_X; x++)
 	{
 		for (int y=0; y<Num_Y; y++)
 		{
-			AllTilesAdapt.Add(FIntVector(x, y,0), tmpTilesAdapt);
+			FWFCPatternsInfo PatternTiles = GetPatternTiles(FIntVector(x, y, 0));
+			
+			FWFCPatternsAdapt tmpPatternsIndex = GatherAdaptPatternsIndex(PatternTiles);
+			
+			PatternsAdapts.Add(FIntVector(x, y, 0), tmpPatternsIndex);
 		}
 	}
-	NextIndex = StartIndex;
 
-	FWFCPatternsInfo NextPattern;
-	//get start patterns adapt
+	int minAdaptNum = AllPatterns.Num() + 1;
+	for (auto patterns : PatternsAdapts)
+	{
+		if(patterns.Value.PatternAdapts.Num() < minAdaptNum)
+		{
+			minAdaptNum = patterns.Value.PatternAdapts.Num();
+			NextIndex = patterns.Key;
+		}
+	}
+}
+
+bool UWFCRolesManagerAsset::IsValidIndex(FIntVector inIndex)
+{
+	if(inIndex.X < 0 || inIndex.X >= Num_X || inIndex.Y < 0 || inIndex.Y >= Num_Y)
+	{
+		return false;
+	}
+	return  true;
+}
+
+FWFCPatternsInfo UWFCRolesManagerAsset::GetPatternTiles(FIntVector Index)
+{
+	FWFCPatternsInfo PatternTiles;
+	//get patterns adapt
 	for (int dx=-1; dx<=1; dx++)
 	{
 		for (int dy=-1; dy<=1; dy++)
 		{
-			FIntVector TmpIndex = FIntVector(NextIndex.X + dx, NextIndex.Y + dy, 0);
+			FIntVector TmpIndex = FIntVector(Index.X + dx, Index.Y + dy, 0);
 			if(IsValidIndex(TmpIndex))
 			{
-				//-2 to mark can fill any tiles
-				NextPattern.PatternTiles.Add(FWFCTileInfo(-2, 0));
+				if(SpawnedIndex.Contains(TmpIndex))
+				{
+					PatternTiles.PatternTiles.Add(FWFCTileInfo(SpawnedIndex[TmpIndex], RotationsIndex[TmpIndex]));
+				}
+				else
+				{
+					//-2 to mark can fill any tiles
+					PatternTiles.PatternTiles.Add(FWFCTileInfo(-2, 0));
+				}
 			}
 			else
 			{
 				//out of grid
-				NextPattern.PatternTiles.Add(FWFCTileInfo(-1, 0));
+				PatternTiles.PatternTiles.Add(FWFCTileInfo(-1, 0));
 			}
 		}
 	}
+	return  PatternTiles;
+}
+
+FWFCPatternsAdapt UWFCRolesManagerAsset::GatherAdaptPatternsIndex(FWFCPatternsInfo PatternTiles)
+{
 	FWFCPatternsAdapt tmpPatternsIndex;
 	for (int i=0; i<AllPatterns.Num(); i++)
 	{
 		bool IsSame = true;
-		for (int j=0; j<NextPattern.PatternTiles.Num(); j++)
+		for (int j=0; j<PatternTiles.PatternTiles.Num(); j++)
 		{
-			if(NextPattern.PatternTiles[j].classIndex == -2)
+			if(PatternTiles.PatternTiles[j].classIndex == -2)
 			{
 				if(AllPatterns[i].PatternTiles[j].classIndex == -1)
 				{
@@ -536,9 +621,10 @@ void UWFCRolesManagerAsset::InitWithPatterns()
 					break;
 				}
 			}
-			else//-1
+			else
 			{
-				if(AllPatterns[i].PatternTiles[j].classIndex != -1)
+				if(AllPatterns[i].PatternTiles[j].classIndex != PatternTiles.PatternTiles[j].classIndex
+					|| AllPatterns[i].PatternTiles[j].rot != PatternTiles.PatternTiles[j].rot)
 				{
 					IsSame = false;
 					break;
@@ -550,16 +636,45 @@ void UWFCRolesManagerAsset::InitWithPatterns()
 			tmpPatternsIndex.PatternAdapts.Add(i);
 		}
 	}
-	PatternsAdapts.Add(NextIndex, tmpPatternsIndex);
+	
+	return tmpPatternsIndex;
 }
 
-bool UWFCRolesManagerAsset::IsValidIndex(FIntVector inIndex)
+FWFCPatternsAdapt UWFCRolesManagerAsset::FilterAdaptPatternsIndex(FIntVector index, FWFCPatternsInfo PatternTiles)
 {
-	if(inIndex.X < 0 || inIndex.X >= Num_X || inIndex.Y < 0 || inIndex.Y >= Num_Y)
+	FWFCPatternsAdapt tmpPatternsIndex;
+	TArray<int32> AdaptIndexs =  PatternsAdapts[index].PatternAdapts;
+	for (int i=0; i<AdaptIndexs.Num(); i++)
 	{
-		return false;
+		int PatternIndex = AdaptIndexs[i];
+
+		bool IsSame = true;
+		for (int j=0; j<PatternTiles.PatternTiles.Num(); j++)
+		{
+			if(PatternTiles.PatternTiles[j].classIndex == -2)
+			{
+				if(AllPatterns[PatternIndex].PatternTiles[j].classIndex == -1)
+				{
+					IsSame = false;
+					break;
+				}
+			}
+			else
+			{
+				if(AllPatterns[PatternIndex].PatternTiles[j].classIndex != PatternTiles.PatternTiles[j].classIndex
+					|| AllPatterns[PatternIndex].PatternTiles[j].rot != PatternTiles.PatternTiles[j].rot)
+				{
+					IsSame = false;
+					break;
+				}
+			}
+		}
+		if(IsSame)
+		{
+			tmpPatternsIndex.PatternAdapts.Add(PatternIndex);
+		}
 	}
-	return  true;
+	return tmpPatternsIndex;
 }
 
 

@@ -253,4 +253,11 @@ private:
 	void InitWithPatterns();
 
 	bool IsValidIndex(FIntVector inIndex);
+
+	FWFCPatternsInfo GetPatternTiles(FIntVector Index);
+
+	FWFCPatternsAdapt GatherAdaptPatternsIndex(FWFCPatternsInfo PatternTiles);
+	
+	FWFCPatternsAdapt FilterAdaptPatternsIndex(FIntVector index, FWFCPatternsInfo PatternTiles);
+
 };
