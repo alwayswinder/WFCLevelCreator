@@ -200,6 +200,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	bool GenerateStep = false;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
+	bool UseFrequence = false;
+	
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Generate")
 	void Analyse();
 	
@@ -208,6 +211,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "WFC Generate")
 	void GenerateItem();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
+	TMap<int32, FWFCPatternsAdapt> ReplaceMap;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WFC Generate")
 	FIntVector StartIndex;
@@ -260,4 +266,8 @@ private:
 	
 	FWFCPatternsAdapt FilterAdaptPatternsIndex(FIntVector index, FWFCPatternsInfo PatternTiles);
 
+	void ReAdaptByGridIndex(FIntVector GridIndex);
+
+	void FillOther();
+	void Replace();
 };

@@ -166,10 +166,26 @@ void UWFCRolesManagerAsset::Analyse()
 	else
 	{
 		AllPatterns.Empty();
+		ClassNumFilled.Empty();
+		CurrentFrequence.Empty();
+		
+		for (auto itemClass : WFCItemClasses)
+		{
+			ClassNumFilled.Add(0);
+			CurrentFrequence.Add(0);
+		}
+		
+		FScopedSlowTask SlowTaskFB(static_cast<float>(Num_X * Num_Y), NSLOCTEXT("UnrealEd", "Generate", "Generate Neighbor Info..."));
+		SlowTaskFB.MakeDialog();
+		
 		for (int x=0; x<Num_X; x++)
 		{
 			for (int y=0; y<Num_Y; y++)
 			{
+				SlowTaskFB.EnterProgressFrame(1);
+
+				ClassNumFilled[SpawnedIndex[FIntVector(x, y,0)]] += 1;
+				
 				//3*3 patterns to array
 				FWFCPatternsInfo tmpPatterns;
 				for (int dx=-1; dx<=1; dx++)
@@ -217,6 +233,14 @@ void UWFCRolesManagerAsset::Analyse()
 					AllPatterns.Add(tmpPatterns);
 				}
 			}
+		}
+
+		TargetFrequency.Empty();
+		int totalnum = Num_X * Num_Y;
+		for (int i=0; i< ClassNumFilled.Num(); i++)
+		{
+			TargetFrequency.Add(ClassNumFilled[i] * 1.f / (totalnum * 1.f));
+			ClassNumFilled[i] = 0;
 		}
 		InitWithPatterns();
 	}
@@ -446,16 +470,40 @@ void UWFCRolesManagerAsset::GenerateWithPatterns()
 {
 	if (PatternsAdapts.Num() > 0 && PatternsAdapts.Contains(NextIndex) && PatternsAdapts[NextIndex].PatternAdapts.Num() > 0)
 	{
-		//select one from adapt
-		TArray<int32> PatternsIndex = PatternsAdapts[NextIndex].PatternAdapts;
-		int selectIndex = FMath::RandRange(0, PatternsIndex.Num()-1);
-		FWFCPatternsInfo SelectedPattern = AllPatterns[PatternsIndex[selectIndex]];
-		FWFCTileInfo FillTile = SelectedPattern.PatternTiles[SelectedPattern.PatternTiles.Num() / 2];
-		
-		WFCGridManagerRef->SpawnItem(NextIndex, FillTile.classIndex, FillTile.rot);
-		
-		PatternsAdapts.Remove(NextIndex);
+		if(UseFrequence)
+		{
+			//select one from adapt
+			float MinFrequence = 10.f;
+			FWFCTileInfo SelectTile;
+			TArray<int32> PatternsIndex = PatternsAdapts[NextIndex].PatternAdapts;
+			for (int i=0; i<PatternsIndex.Num(); i++)
+			{
+				FWFCPatternsInfo AdaptPattern = AllPatterns[PatternsIndex[i]];
+				FWFCTileInfo AdaptTile = AdaptPattern.PatternTiles[AdaptPattern.PatternTiles.Num() / 2];
+				float tmpFrequence = (ClassNumFilled[AdaptTile.classIndex] / (Num_X * Num_Y * 1.f)) / TargetFrequency[AdaptTile.classIndex];
 
+				if(tmpFrequence < MinFrequence)
+				{
+					MinFrequence = tmpFrequence;
+					SelectTile = AdaptTile;
+				}
+			}
+		
+			WFCGridManagerRef->SpawnItem(NextIndex, SelectTile.classIndex, SelectTile.rot);
+			ClassNumFilled[SelectTile.classIndex] = ClassNumFilled[SelectTile.classIndex] + 1;
+			CurrentFrequence[SelectTile.classIndex] = ClassNumFilled[SelectTile.classIndex] / (Num_X * Num_Y * 1.f);
+			PatternsAdapts.Remove(NextIndex);
+		}
+		else
+		{
+			TArray<int32> PatternsIndex = PatternsAdapts[NextIndex].PatternAdapts;
+			int selectIndex = FMath::RandRange(0, PatternsIndex.Num()-1);
+			FWFCPatternsInfo SelectedPattern = AllPatterns[PatternsIndex[selectIndex]];
+			FWFCTileInfo FillTile = SelectedPattern.PatternTiles[SelectedPattern.PatternTiles.Num() / 2];
+		
+			WFCGridManagerRef->SpawnItem(NextIndex, FillTile.classIndex, FillTile.rot);
+			PatternsAdapts.Remove(NextIndex);
+		}
 		//update neighbor
 		for (int dx=-1; dx<=1; dx++)
 		{
@@ -493,6 +541,11 @@ void UWFCRolesManagerAsset::GenerateWithPatterns()
 	else//end or error!
 	{
 		//todo!
+		if(!GenerateStep)
+		{
+			FillOther();
+			Replace();
+		}
 	}
 	Modify();
 }
@@ -541,6 +594,14 @@ void UWFCRolesManagerAsset::InitWithRoles()
 void UWFCRolesManagerAsset::InitWithPatterns()
 {
 	PatternsAdapts.Empty();
+	ClassNumFilled.Empty();
+	CurrentFrequence.Empty();
+
+	for (int c =0; c<WFCItemClasses.Num(); c++)
+	{
+		ClassNumFilled.Add(0);
+		CurrentFrequence.Add(0);
+	}
 	
 	for (int x=0; x<Num_X; x++)
 	{
@@ -675,6 +736,181 @@ FWFCPatternsAdapt UWFCRolesManagerAsset::FilterAdaptPatternsIndex(FIntVector ind
 		}
 	}
 	return tmpPatternsIndex;
+}
+
+void UWFCRolesManagerAsset::ReAdaptByGridIndex(FIntVector GridIndex)
+{
+	FWFCTilesAdapt tmpAllTilesAdapt;
+	
+	for (int c =0; c<WFCItemClasses.Num(); c++)
+	{
+		//fill all rot
+		for (int r=0; r<4; r++)
+		{
+			tmpAllTilesAdapt.TilesAdapt.Add(FWFCTileInfo(c, r));
+		}
+	}
+
+	//Filter left
+	FIntVector leftindex = GridIndex + FIntVector(0, -1, 0);
+	//valid and spawn
+	if(IsValidIndex(leftindex) && SpawnedIndex.Contains(leftindex))
+	{
+		for (int t = tmpAllTilesAdapt.TilesAdapt.Num()-1; t>=0; t--)
+		{
+			int32 c = tmpAllTilesAdapt.TilesAdapt[t].classIndex;
+			int32 r = tmpAllTilesAdapt.TilesAdapt[t].rot;
+			if(!WFCGridManagerRef->IsAdaptLR(WFCItemClasses[SpawnedIndex[leftindex]], WFCItemClasses[c],
+				RotationsIndex[leftindex], r))
+			{
+				tmpAllTilesAdapt.TilesAdapt.RemoveAt(t);
+			}
+		}
+	}
+	//right
+	FIntVector rightindex = GridIndex + FIntVector(0, 1, 0);
+	if(IsValidIndex(rightindex) && SpawnedIndex.Contains(rightindex))
+	{
+		for (int t = tmpAllTilesAdapt.TilesAdapt.Num()-1; t>=0; t--)
+		{
+			int32 c = tmpAllTilesAdapt.TilesAdapt[t].classIndex;
+			int32 r = tmpAllTilesAdapt.TilesAdapt[t].rot;
+			if(!WFCGridManagerRef->IsAdaptLR(WFCItemClasses[c], WFCItemClasses[SpawnedIndex[rightindex]],
+				r, RotationsIndex[rightindex]))
+			{
+				tmpAllTilesAdapt.TilesAdapt.RemoveAt(t);
+			}
+		}
+	}
+
+	//Front
+	FIntVector Frontindex = GridIndex + FIntVector(1, 0, 0);
+	if(IsValidIndex(Frontindex) && SpawnedIndex.Contains(Frontindex))
+	{
+		for (int t = tmpAllTilesAdapt.TilesAdapt.Num()-1; t>=0; t--)
+		{
+			int32 c = tmpAllTilesAdapt.TilesAdapt[t].classIndex;
+			int32 r = tmpAllTilesAdapt.TilesAdapt[t].rot;
+			if(!WFCGridManagerRef->IsAdaptFB(WFCItemClasses[SpawnedIndex[Frontindex]], WFCItemClasses[c], 
+				RotationsIndex[Frontindex], r))
+			{
+				tmpAllTilesAdapt.TilesAdapt.RemoveAt(t);
+			}
+		}
+	}
+
+	//back
+	FIntVector backindex = GridIndex + FIntVector(-1, 0, 0);
+	if(IsValidIndex(backindex) && SpawnedIndex.Contains(backindex))
+	{
+		for (int t = tmpAllTilesAdapt.TilesAdapt.Num()-1; t>=0; t--)
+		{
+			int32 c = tmpAllTilesAdapt.TilesAdapt[t].classIndex;
+			int32 r = tmpAllTilesAdapt.TilesAdapt[t].rot;
+			if(!WFCGridManagerRef->IsAdaptFB(WFCItemClasses[c], WFCItemClasses[SpawnedIndex[backindex]],
+				r, RotationsIndex[backindex]))
+			{
+				tmpAllTilesAdapt.TilesAdapt.RemoveAt(t);
+			}
+		}
+	}
+
+	int selectindex = FMath::RandRange(0, tmpAllTilesAdapt.TilesAdapt.Num() -1);
+	if(tmpAllTilesAdapt.TilesAdapt.IsValidIndex(selectindex))
+	{
+		FWFCTileInfo selectTile = tmpAllTilesAdapt.TilesAdapt[selectindex];
+		WFCGridManagerRef->SpawnItem(GridIndex, selectTile.classIndex, selectTile.rot);
+	}
+}
+
+void UWFCRolesManagerAsset::FillOther()
+{
+	for (int x=0; x<Num_X; x++)
+	{
+		for (int y=0; y<Num_Y; y++)
+		{
+			FIntVector CurIndex = FIntVector(x, y, 0);
+
+			//not filled
+			if(!SpawnedIndex.Contains(CurIndex))
+			{
+				ReAdaptByGridIndex(CurIndex);
+			}
+		}
+	}
+	Modify();
+}
+
+void UWFCRolesManagerAsset::Replace()
+{
+	bool IsLoop = false;
+	for (auto replace : ReplaceMap)
+	{
+		int32 oldindex = replace.Key;
+		//*****
+		int select = FMath::RandRange(0, replace.Value.PatternAdapts.Num()-1);
+		int32 newindex = replace.Value.PatternAdapts[select];
+		for (auto spawned :SpawnedIndex )
+		{
+			if(spawned.Value == oldindex)
+				//&&(spawned.Key.X != 0 && spawned.Key.Y != 0 && spawned.Key.X != (Num_X -1) && spawned.Key.Y != (Num_Y -1)))
+			{
+				IsLoop = true;
+				FIntVector GridIndex = spawned.Key;
+				int rotsave = RotationsIndex[spawned.Key];
+				WFCGridManagerRef->RemoveItem(GridIndex);
+				WFCGridManagerRef->SpawnItem(GridIndex, newindex, rotsave);
+
+				//re adapt neighbor
+				//left
+				FIntVector leftGridIndex = GridIndex + FIntVector(0, -1, 0);
+				if(IsValidIndex(leftGridIndex) &&
+					!WFCGridManagerRef->IsAdaptLR(WFCItemClasses[SpawnedIndex[leftGridIndex]],
+						WFCItemClasses[newindex],
+					RotationsIndex[leftGridIndex],rotsave))
+				{
+					WFCGridManagerRef->RemoveItem(leftGridIndex);
+					ReAdaptByGridIndex(leftGridIndex);
+				}
+				//right
+				FIntVector rightGridIndex = GridIndex + FIntVector(0, 1, 0);
+				if(IsValidIndex(rightGridIndex) &&
+					!WFCGridManagerRef->IsAdaptLR(WFCItemClasses[newindex],
+						WFCItemClasses[SpawnedIndex[rightGridIndex]], 
+					rotsave, RotationsIndex[rightGridIndex]))
+				{
+					WFCGridManagerRef->RemoveItem(rightGridIndex);
+					ReAdaptByGridIndex(rightGridIndex);
+				}
+				//front
+				FIntVector frontGridIndex = GridIndex + FIntVector(1, 0, 0);
+				if(IsValidIndex(frontGridIndex) &&
+					!WFCGridManagerRef->IsAdaptFB(WFCItemClasses[SpawnedIndex[frontGridIndex]],
+						WFCItemClasses[newindex],
+					RotationsIndex[frontGridIndex],rotsave))
+				{
+
+					WFCGridManagerRef->RemoveItem(frontGridIndex);
+					ReAdaptByGridIndex(frontGridIndex);
+				}
+				//back
+				FIntVector backGridIndex = GridIndex + FIntVector(-1, 0, 0);
+				if(IsValidIndex(backGridIndex) &&
+					!WFCGridManagerRef->IsAdaptFB(WFCItemClasses[newindex],
+						WFCItemClasses[SpawnedIndex[backGridIndex]], 
+					rotsave,RotationsIndex[backGridIndex]))
+				{
+					WFCGridManagerRef->RemoveItem(backGridIndex);
+					ReAdaptByGridIndex(backGridIndex);
+				}
+			}
+		}
+	}
+	if(IsLoop)
+	{
+		Replace();
+	}
+	Modify();
 }
 
 
