@@ -704,6 +704,8 @@ FWFCPatternsAdapt UWFCRolesManagerAsset::GatherAdaptPatternsIndex(FWFCPatternsIn
 FWFCPatternsAdapt UWFCRolesManagerAsset::FilterAdaptPatternsIndex(FIntVector index, FWFCPatternsInfo PatternTiles)
 {
 	FWFCPatternsAdapt tmpPatternsIndex;
+	if(!PatternsAdapts.Contains(index)) return tmpPatternsIndex;
+	
 	TArray<int32> AdaptIndexs =  PatternsAdapts[index].PatternAdapts;
 	for (int i=0; i<AdaptIndexs.Num(); i++)
 	{
